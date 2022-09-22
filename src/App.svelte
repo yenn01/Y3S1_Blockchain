@@ -1,13 +1,18 @@
 <script>
-	export let name;
+    import Wallet from "./wallet.svelte";
+
 </script>
 
 <main>
-	<h1>Hello {name}!</h1>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
+	<Wallet></Wallet>
 </main>
 
 <style>
+	:global(body){
+		/* background-color:darkseagreen; */
+		background: #282c34;
+		min-height: 96vh;
+	}
 	main {
 		text-align: center;
 		padding: 1em;
