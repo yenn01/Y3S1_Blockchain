@@ -1,16 +1,43 @@
 <script>
-    import Wallet from "./wallet.svelte";
-
+    import Header from "./Header.svelte";
+    import { Route, router } from 'tinro'; 
+    import Toast from "./components/Toast.svelte";
+    import {notifications} from './stores/notifications.js'
 </script>
 
+<svelte:head>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
+ 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+</svelte:head>
+
 <main>
-	<Wallet></Wallet>
+    <Toast/>
+    <Route path="/">  </Route>
+	
+    <div class="component-container">
+        <Route path="/swap">
+            <Header></Header>
+             Swap Here :D 
+             
+            
+        </Route>
+    </div>
 </main>
 
 <style>
+    :root {
+        --text-color: #bfc2c7;
+        --theme-color-main: #ea86a7;
+        --theme-color-second : #81d1e2;
+        --theme-color-third: #81e292;
+        --theme-color-darker-bg: #212529;
+    }
+
+
 	:global(body){
 		/* background-color:darkseagreen; */
-		background: #282c34;
+		background: #282c34 !important;
 		min-height: 96vh;
 	}
 	main {
@@ -27,7 +54,7 @@
 		font-weight: 100;
 	}
 
-	@media (min-width: 640px) {
+	@media (min-width: 500px) {
 		main {
 			max-width: none;
 		}
