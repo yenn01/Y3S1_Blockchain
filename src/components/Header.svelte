@@ -44,8 +44,8 @@
 
     export const getBalance = async (address) => {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const balance = await provider.getBalance(address);
-        const balanceInEth = ethers.utils.formatEther(balance);
+        let balance = await provider.getBalance(address);
+        let balanceInEth = ethers.utils.formatEther(balance);
         anime({
             targets: '#amount',
             innerHTML: [0,balanceInEth],
@@ -54,6 +54,25 @@
             duration:3000,            
         })
         accountBalance = balanceInEth;
+        let oldBalance = accountBalance;
+        //when new block is mined
+        provider.on('block', async () => {
+
+            console.log("New Block")
+            balance = await provider.getBalance(address);
+            balanceInEth = ethers.utils.formatEther(balance);
+            if (balanceInEth !== oldBalance) {
+                anime({
+                    targets: '#amount',
+                    innerHTML: [0,balanceInEth],
+                    easing: 'easeOutExpo',
+                    round:10000,
+                    duration:3000,            
+                })
+                accountBalance = balanceInEth;
+            }
+        })
+
     }
 
     const truncate = function (fullStr, strLen, separator) {
@@ -97,7 +116,7 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="/dashboard">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-grid-1x2-fill" viewBox="0 0 16 16">
                         <path d="M0 1a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V1zm9 0a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1V1zm0 9a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-5z"/>
                       </svg>
