@@ -1,7 +1,8 @@
 <script>
-    import Header from "./components/Header.svelteader.svelte";
+    import Header from "./components/Header.svelte";
     import { Route, router } from 'tinro'; 
     import Toast from "./components/Toast.svelte";
+    import Dashboard from "./components/Dashboard.svelte";
 
 
     let header;
@@ -19,6 +20,9 @@
     <Route path="/">  </Route>
     <Header></Header>
     <div class="component-container">
+        <Route path="/dashboard">
+        <Dashboard></Dashboard>
+        </Route>
         <Route path="/swap">
            
              Swap Here :D 
