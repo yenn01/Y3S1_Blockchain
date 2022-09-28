@@ -3,6 +3,7 @@
     import { fade } from 'svelte/transition';
     import { accountStore } from '../stores/accountStore.js'
     import { ethers } from "ethers";
+    import anime from 'animejs/lib/anime.es.js';
     import { notifications } from '../stores/notifications.js'
     import jazzicon from "@metamask/jazzicon"
 //     import { ethers } from "ethers";
@@ -45,6 +46,13 @@
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const balance = await provider.getBalance(address);
         const balanceInEth = ethers.utils.formatEther(balance);
+        anime({
+            targets: '#amount',
+            innerHTML: [0,balanceInEth],
+            easing: 'easeOutExpo',
+            round:10000,
+            duration:3000,            
+        })
         accountBalance = balanceInEth;
     }
 
@@ -125,7 +133,10 @@
            
             {:else}
             <div class="amount-holder" transition:fade on:introend={() => {genIcon()}}>
-                <div class="amount">{accountBalance} <strong>ETH</strong></div>
+                <div class="amount-container" >
+                    <div class="amount" id="amount">{accountBalance}</div> 
+                    <strong>ETH</strong>
+                </div>
                 <div class="addr">{truncate($accountStore,10)}</div>
                 <div class="jazz" bind:this={accicon} transition:fade></div>
             </div>
@@ -167,21 +178,29 @@
         border: 2px solid var(--theme-color-second);
     }
 
-    .amount {
-        font-size: 1.2rem;
-        font-family: 'Iosevka Web', monospace;
-        margin-right: 0.7rem;
-        padding-top:0.1rem;
+    .amount-container {
+        display:flex;
         background-color: var(--theme-color-second);
         padding: 0.2rem;
         border-radius: 8px;
         color: var(--theme-color-darker-bg);
+        font-size: 1.2rem;
+        font-family: 'Iosevka Web', monospace;
+        align-items: center;
+    }
+
+    .amount {
+        text-align:right;
+        min-width: 70px;
+        margin-right: 0.3rem;
+        padding-top:0.1rem;
+       
     }
 
     .addr {
         font-size: 1.2rem;
         font-family: 'Iosevka Web', monospace;
-        margin-right: 0.7rem;
+        margin: 0 0.7rem;
         padding-top:0.1rem;
     }
 
