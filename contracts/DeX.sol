@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-import "hardhat/console.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
+//import "hardhat/console.sol";
+//import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract DeX{
 
@@ -154,7 +154,7 @@ contract DeX{
         addPool('Bitcoin', 101, 20000);
         addPool('Ether', 1359, 20000);
         addPool('PAX Gold', 1187, 20000);
-        console.log("Pool created successfully. Liquidity Provider:", msg.sender);
+        //console.log("Pool created successfully. Liquidity Provider:", msg.sender);
     }
 
     // Buy exchangeAmt of cryptoType with X targetCryptoType
@@ -166,7 +166,7 @@ contract DeX{
         for(j=0; j<cryptoListNum; j++){
             if(keccak256(abi.encodePacked(cryptoList[j].cryptoName)) == keccak256(abi.encodePacked(cryptoType))){
                 if(cryptoList[j].cryptoAmt==0 || cryptoList[j].cryptoAmt<exchangeAmt){
-                    console.log(string(abi.encodePacked("Cryptocurrency ", cryptoList[j].cryptoName, " pool is not enough. Maximum amount: ", Strings.toString(cryptoList[j].cryptoAmt))));
+                    //console.log(string(abi.encodePacked("Cryptocurrency ", cryptoList[j].cryptoName, " pool is not enough. Maximum amount: ", Strings.toString(cryptoList[j].cryptoAmt))));
                     revert();
                 }
                 token = ((cryptoList[j].tokenAmt*cryptoList[j].cryptoAmt)/(cryptoList[j].cryptoAmt-exchangeAmt))-cryptoList[j].tokenAmt;
@@ -210,7 +210,7 @@ contract DeX{
         for(i=0; i<cryptoListNum; i++){
             if(keccak256(abi.encodePacked(cryptoList[i].cryptoName)) == keccak256(abi.encodePacked(targetCryptoType))){
                 if(cryptoList[i].cryptoAmt==0){
-                    console.log(string(abi.encodePacked("Cryptocurrency ", cryptoList[i].cryptoName, " pool is empty.")));
+                    //console.log(string(abi.encodePacked("Cryptocurrency ", cryptoList[i].cryptoName, " pool is empty.")));
                     cryptoList[j].tokenAmt += token;
                     cryptoList[j].cryptoAmt -= exchangeAmt;
                     revert();
