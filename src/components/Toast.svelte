@@ -15,6 +15,7 @@
 
 </script>
 <!-- Call notification sample code
+        import {notifications} from './stores/notifications.js'
     <button on:click={() => notifications.success('Hi there :DD', 4000)}>info!</button> 
     Takes two params, msg, timeout. Supports :
     notifications.danger

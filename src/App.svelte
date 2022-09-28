@@ -2,7 +2,7 @@
     import Header from "./Header.svelte";
     import { Route, router } from 'tinro'; 
     import Toast from "./components/Toast.svelte";
-    import {notifications} from './stores/notifications.js'
+
 </script>
 
 <svelte:head>
@@ -39,12 +39,15 @@
 		/* background-color:darkseagreen; */
 		background: #282c34 !important;
 		min-height: 96vh;
+        
 	}
 	main {
 		text-align: center;
 		padding: 1em;
-		max-width: 240px;
+		max-width: 992px;
 		margin: 0 auto;
+        color : var(--text-color);
+        min-width:500px;
 	}
 
 	h1 {

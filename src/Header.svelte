@@ -1,7 +1,7 @@
 <script>
 	import { Rainbow } from 'svelte-loading-spinners'
     import { accountStore } from './stores/accountStore.js'
-
+    import {notifications} from './stores/notifications.js'
 //     import { ethers } from "ethers";
 // const provider = new ethers.providers.Web3Provider(window.ethereum)
 
@@ -19,7 +19,7 @@
                 loading=false;
             }).catch((e)=>{
                 console.error(e)
-                alert(e.message)
+                notifications.danger(e.message, 4000)
 				loading = false;
 			}); // use the request method to get the accounts, aka logging in to Metamask
 			
@@ -27,10 +27,10 @@
 				// it returns an array of accounts, it should have at least 1 element
 				$accountStore = accounts[0]; // update the state
 			} else {
-				alert('No ethereum accounts found');
+                notifications.danger('No Ethereum Accounts Found', 4000)
 			}
 		}else {
-			alert('No ethereum Wallet found');
+			notifications.danger('No Ethereum Wallet Found', 4000)
 		}
 		
 		
@@ -109,6 +109,10 @@
         transition: 0.2s ease-in-out;
     }
 
+    li {
+        font-size: 1.25rem;
+    }
+
 
     .connect-holder {
         display:flex;
@@ -126,13 +130,14 @@
 	}
 
 	.connect{
-		font-size: 1rem;
+		font-size: 1.27rem;
 		font-family: sans-serif;
 		background-color:var(--theme-color-second);
 		color: black;
 		border-radius: 8px;
 		transition-duration: 0.4s;
         padding: 0.5rem 1rem;
+        min-width: 200px;
 	}
 
 	.connect:hover{
