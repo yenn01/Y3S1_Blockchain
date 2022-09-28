@@ -1,5 +1,5 @@
 <script>
-    import Header from "./Header.svelte";
+    import Header from "./components/Header.svelteader.svelte";
     import { Route, router } from 'tinro'; 
     import Toast from "./components/Toast.svelte";
 

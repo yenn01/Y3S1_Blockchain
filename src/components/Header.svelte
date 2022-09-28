@@ -1,9 +1,9 @@
 <script>
 	import { Rainbow } from 'svelte-loading-spinners'
     import { fade } from 'svelte/transition';
-    import { accountStore } from './stores/accountStore.js'
+    import { accountStore } from '../stores/accountStore.js'
     import { ethers } from "ethers";
-    import { notifications } from './stores/notifications.js'
+    import { notifications } from '../stores/notifications.js'
     import jazzicon from "@metamask/jazzicon"
 //     import { ethers } from "ethers";
 // const provider = new ethers.providers.Web3Provider(window.ethereum)
