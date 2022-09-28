@@ -1,24 +1,31 @@
 <script>
-    import Header from "./Header.svelte";
+    import Header from "./components/Header.svelte";
     import { Route, router } from 'tinro'; 
     import Toast from "./components/Toast.svelte";
 	import Swap from "./Swap.svelte";
+    import Dashboard from "./components/Dashboard.svelte";
 
+
+    let header;
 </script>
 
 <svelte:head>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
  	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <link href="https://pvinis.github.io/iosevka-webfont/3.4.1/iosevka.css" rel="stylesheet" />
 </svelte:head>
 
 <main>
-    <Toast/>
+    <Toast></Toast>
     <Route path="/">  </Route>
-	
+    <Header></Header>
     <div class="component-container">
+        <Route path="/dashboard">
+        <Dashboard></Dashboard>
+        </Route>
         <Route path="/swap">
-            <Header></Header>
+           
 			<Swap></Swap>
              
             

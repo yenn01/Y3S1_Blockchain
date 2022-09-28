@@ -19,8 +19,12 @@
     "tinro": "^0.6.12"
   },
   "dependencies": {
+    "@metamask/jazzicon": "^2.0.0",
+    "@openzeppelin/contracts": "^4.7.3",
     "animejs": "^3.2.1",
+    "ethers": "^5.7.1",
     "sirv-cli": "^2.0.0",
-    "svelte-loading-spinners": "^0.1.7"
+    "svelte-loading-spinners": "^0.1.7",
+    "truffle": "^5.5.31"
   }
 }
