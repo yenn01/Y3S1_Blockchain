@@ -12,6 +12,9 @@ contract DeX{
     // 3. Bitcoin price = 19,758.00 usd
     // 4. PAX Gold price = 1,685.00 usd
 
+    //Add code to convert 1 ETH -> Y4 Token 
+    //Add mapping for balance(address)
+
     struct pool{
         string cryptoName;
         uint cryptoAmt;
@@ -24,6 +27,16 @@ contract DeX{
     uint cryptoListNum = 0;
 
     event OwnerSet(address indexed oldOwner, address indexed newOwner);
+    event PoolValue(string indexed cryptoName,uint indexed cVal, uint indexed tVal);
+
+    constructor() {
+        owner = msg.sender; 
+        emit OwnerSet(address(0), owner);
+        addPool('Bitcoin', 101, 20000);
+        addPool('Ether', 1359, 20000);
+        addPool('PAX Gold', 1187, 20000);
+        //console.log("Pool created successfully. Liquidity Provider:", msg.sender);
+    }
 
     modifier isOwner() {
         require(msg.sender == owner, "Caller is not owner");
@@ -31,6 +44,7 @@ contract DeX{
     }
 
     modifier inList(string memory cName, int funcName) {
+        //Used to validate add pool
         if(funcName == 0){
             bool resultStatus = true;
             for (uint j=0; j<cryptoListNum; j++) {
@@ -41,6 +55,7 @@ contract DeX{
             }
             require(resultStatus, string(abi.encodePacked("Cryptocurrency ", cName, " already exist.")));
         }
+        //Used to validate add amount to pool
         else if(funcName == 1){
             bool resultStatus = false;
             for (uint j=0; j<cryptoListNum; j++) {
@@ -51,6 +66,7 @@ contract DeX{
             }
             require(resultStatus, string(abi.encodePacked("Cryptocurrency ", cName, " is not exist.")));
         }
+        //Used to validate edit pool
         else if(funcName == 2 && bytes(cName).length!=0){
             bool resultStatus = true;
             for (uint j=0; j<cryptoListNum; j++) {
@@ -61,6 +77,7 @@ contract DeX{
             }
             require(resultStatus, string(abi.encodePacked("Cryptocurrency ", cName, " already exist.")));
         }
+        //Used to validate exchange buy and sell crypto
         else if(funcName == 3){
             bool resultStatus = false;
             for (uint j=0; j<cryptoListNum; j++) {
@@ -80,6 +97,7 @@ contract DeX{
             cryptoList[cryptoListNum] = pool(cName, cVal, tVal, true);
             cryptoListNum ++;
         }
+        emit PoolValue(cName,cVal,tVal);
     }
 
     function getPool(string memory cName) public view returns(pool memory){
@@ -109,6 +127,8 @@ contract DeX{
                 break;
             }
         }
+        emit PoolValue(cName,uint(cVal),uint(tVal));
+        //Add write success or fail return/emit
     }
 
     // left the newCName empty if no update
@@ -130,6 +150,8 @@ contract DeX{
         cryptoList[j].cryptoAmt = cVal;
         cryptoList[j].tokenAmt = tVal;
         cryptoList[j].cryptoStatus = pStatus;
+        emit PoolValue(newCName,cVal,tVal);
+         //Add write success or fail return/emit
     }
 
     function listAllPool() public isOwner view returns(pool[] memory){
@@ -148,15 +170,6 @@ contract DeX{
         return tempPool;
     }
 
-    constructor() {
-        owner = msg.sender; 
-        emit OwnerSet(address(0), owner);
-        addPool('Bitcoin', 101, 20000);
-        addPool('Ether', 1359, 20000);
-        addPool('PAX Gold', 1187, 20000);
-        //console.log("Pool created successfully. Liquidity Provider:", msg.sender);
-    }
-
     // Buy exchangeAmt of cryptoType with X targetCryptoType
     function exchangeBuy(string memory cryptoType, uint exchangeAmt, string memory targetCryptoType) public inList(cryptoType, 3) inList(targetCryptoType, 3) returns(string memory, uint){
         // Exchange cryptoType to token
@@ -172,6 +185,7 @@ contract DeX{
                 token = ((cryptoList[j].tokenAmt*cryptoList[j].cryptoAmt)/(cryptoList[j].cryptoAmt-exchangeAmt))-cryptoList[j].tokenAmt;
                 cryptoList[j].tokenAmt -= token;
                 cryptoList[j].cryptoAmt += exchangeAmt;
+                emit PoolValue(cryptoList[j].cryptoName,cryptoList[j].cryptoAmt,cryptoList[j].tokenAmt);
                 break;
             }
         }
@@ -183,6 +197,7 @@ contract DeX{
                 returnAmt = ((cryptoList[i].tokenAmt*cryptoList[i].cryptoAmt)/(cryptoList[i].tokenAmt-token))-cryptoList[i].cryptoAmt;
                 cryptoList[i].tokenAmt += token;
                 cryptoList[i].cryptoAmt -= returnAmt;
+                emit PoolValue(cryptoList[i].cryptoName,cryptoList[i].cryptoAmt,cryptoList[i].tokenAmt);
                 break;
             }
         }
@@ -201,6 +216,7 @@ contract DeX{
                 token = cryptoList[j].tokenAmt-((cryptoList[j].tokenAmt*cryptoList[j].cryptoAmt)/(cryptoList[j].cryptoAmt+exchangeAmt));
                 cryptoList[j].tokenAmt -= token;
                 cryptoList[j].cryptoAmt += exchangeAmt;
+                emit PoolValue(cryptoList[j].cryptoName,cryptoList[j].cryptoAmt,cryptoList[j].tokenAmt);
                 break;
             }
         }
@@ -218,6 +234,7 @@ contract DeX{
                 returnAmt = cryptoList[i].cryptoAmt-((cryptoList[i].tokenAmt*cryptoList[i].cryptoAmt)/(cryptoList[i].tokenAmt+token));
                 cryptoList[i].tokenAmt += token;
                 cryptoList[i].cryptoAmt -= returnAmt;
+                emit PoolValue(cryptoList[i].cryptoName,cryptoList[i].cryptoAmt,cryptoList[i].tokenAmt);
                 break;
             }
         }
