@@ -2,8 +2,9 @@
     import Header from "./components/Header.svelte";
     import { Route, router } from 'tinro'; 
     import Toast from "./components/Toast.svelte";
-	import Swap from "./Swap.svelte";
+	import Swap from "./components/Swap.svelte";
     import Dashboard from "./components/Dashboard.svelte";
+    import About from "./components/About.svelte";
 
 
     let header;
@@ -22,15 +23,14 @@
     <Header></Header>
     <div class="component-container">
         <Route path="/dashboard">
-        <Dashboard></Dashboard>
+            <Dashboard></Dashboard>
         </Route>
         <Route path="/swap">
-           
 			<Swap></Swap>
-             
-            
-        </Route>
-		
+        </Route>	
+        <Route path="/about">
+            <About></About>
+        </Route>	
     </div>
 </main>
 
