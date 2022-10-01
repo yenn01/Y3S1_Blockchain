@@ -2,6 +2,7 @@
     import Header from "./components/Header.svelte";
     import { Route, router } from 'tinro'; 
     import Toast from "./components/Toast.svelte";
+	import Swap from "./Swap.svelte";
     import Dashboard from "./components/Dashboard.svelte";
 
 
@@ -25,10 +26,11 @@
         </Route>
         <Route path="/swap">
            
-             Swap Here :D 
+			<Swap></Swap>
              
             
         </Route>
+		
     </div>
 </main>
 
@@ -39,6 +41,7 @@
         --theme-color-second : #81d1e2;
         --theme-color-third: #81e292;
         --theme-color-darker-bg: #212529;
+		--theme-color-bg: #282c34;
     }
 
 
