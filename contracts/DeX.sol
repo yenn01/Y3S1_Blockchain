@@ -27,6 +27,7 @@ contract DeX{
     uint cryptoListNum = 0;
 
     event OwnerSet(address indexed oldOwner, address indexed newOwner);
+    event PoolValue(string indexed cryptoName,uint indexed cVal, uint indexed tVal);
 
     constructor() {
         owner = msg.sender; 
@@ -96,6 +97,7 @@ contract DeX{
             cryptoList[cryptoListNum] = pool(cName, cVal, tVal, true);
             cryptoListNum ++;
         }
+        emit PoolValue(cName,cVal,tVal);
     }
 
     function getPool(string memory cName) public view returns(pool memory){
@@ -125,6 +127,7 @@ contract DeX{
                 break;
             }
         }
+        emit PoolValue(cName,uint(cVal),uint(tVal));
         //Add write success or fail return/emit
     }
 
@@ -147,6 +150,7 @@ contract DeX{
         cryptoList[j].cryptoAmt = cVal;
         cryptoList[j].tokenAmt = tVal;
         cryptoList[j].cryptoStatus = pStatus;
+        emit PoolValue(newCName,cVal,tVal);
          //Add write success or fail return/emit
     }
 
@@ -181,6 +185,7 @@ contract DeX{
                 token = ((cryptoList[j].tokenAmt*cryptoList[j].cryptoAmt)/(cryptoList[j].cryptoAmt-exchangeAmt))-cryptoList[j].tokenAmt;
                 cryptoList[j].tokenAmt -= token;
                 cryptoList[j].cryptoAmt += exchangeAmt;
+                emit PoolValue(cryptoList[j].cryptoName,cryptoList[j].cryptoAmt,cryptoList[j].tokenAmt);
                 break;
             }
         }
@@ -192,6 +197,7 @@ contract DeX{
                 returnAmt = ((cryptoList[i].tokenAmt*cryptoList[i].cryptoAmt)/(cryptoList[i].tokenAmt-token))-cryptoList[i].cryptoAmt;
                 cryptoList[i].tokenAmt += token;
                 cryptoList[i].cryptoAmt -= returnAmt;
+                emit PoolValue(cryptoList[i].cryptoName,cryptoList[i].cryptoAmt,cryptoList[i].tokenAmt);
                 break;
             }
         }
@@ -210,6 +216,7 @@ contract DeX{
                 token = cryptoList[j].tokenAmt-((cryptoList[j].tokenAmt*cryptoList[j].cryptoAmt)/(cryptoList[j].cryptoAmt+exchangeAmt));
                 cryptoList[j].tokenAmt -= token;
                 cryptoList[j].cryptoAmt += exchangeAmt;
+                emit PoolValue(cryptoList[j].cryptoName,cryptoList[j].cryptoAmt,cryptoList[j].tokenAmt);
                 break;
             }
         }
@@ -227,6 +234,7 @@ contract DeX{
                 returnAmt = cryptoList[i].cryptoAmt-((cryptoList[i].tokenAmt*cryptoList[i].cryptoAmt)/(cryptoList[i].tokenAmt+token));
                 cryptoList[i].tokenAmt += token;
                 cryptoList[i].cryptoAmt -= returnAmt;
+                emit PoolValue(cryptoList[i].cryptoName,cryptoList[i].cryptoAmt,cryptoList[i].tokenAmt);
                 break;
             }
         }

@@ -1,13 +1,14 @@
 <script>
-    import { ethers } from "ethers";
+    import { ethers, utils } from "ethers";
     import abi from '../../build/contracts/DeX.json';
 
     //Used to create dispatch events catched by parent components
     import { createEventDispatcher } from 'svelte';
+    import { keccak256, solidityKeccak256 } from "ethers/lib/utils";
 
     const dispatch = createEventDispatcher();
 
-    const contractAddr = '0x4460c452A40a3F33bbfb24dF65134bBBc95B38f7'
+    const contractAddr = '0x2B2023090039490b2e1A530A81ff677ccB310C7c'
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     let contract = new ethers.Contract(contractAddr, abi.abi, provider);
@@ -44,6 +45,26 @@
             console.log(res)
             dispatch('s_getPool',res)
         })
+    }
+
+    export const getOwner = async () => {
+        const flt = contract.filters.OwnerSet(null,contractAddr)
+        const log = await getEthersLog(contract, flt)  
+        console.log(log)
+    }
+    export const getValChanges = async () => {
+        const flt = contract.filters.PoolValue('Ether')
+        console.log(flt)
+        const log = await getEthersLog(contract, flt)  
+        console.log(log)
+    }
+
+    export const getLast10ValChanges = async () => {
+        const flt = contract.filters.PoolValue('Ether')
+        console.log(qryFlt)
+        const log = await getEthersLog(contract, flt)  
+        const last = log.slice(Math.max(log.length - 10, 0))
+        console.log(last)
     }
 
 
@@ -91,7 +112,6 @@
     }
 
 
-
     function formatTokenListResponse(response) {
         let allActive = [];
         response.forEach((item,i) => {
@@ -112,5 +132,30 @@
         })
         return allActive
     }
+
+    const parseEtherjsLog = (parsed) => {
+    let parsedEvent = {}
+        for (let i = 0; i < parsed.args.length; i++) {
+            const input = parsed.eventFragment.inputs[i]
+            const arg = parsed.args[i]
+            const newObj = {...input, ...{"value": arg}}
+            parsedEvent[input["name"]] = newObj
+        }
+        return parsedEvent
+    }
+
+    export const getEthersLog = async (contract, filter) => {
+        if (contract === undefined || filter === undefined ) return
+        const events = await contract.queryFilter(filter)
+        if (events.length === 0) return
+        let parsedEvents = []
+        for (let event of events) {
+            const ethersParsed = contract.interface.parseLog(event)
+            const customParsed = parseEtherjsLog(ethersParsed)
+            parsedEvents.push(customParsed)
+        }
+        return parsedEvents
+    }
+
 
 </script>
