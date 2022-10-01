@@ -5,12 +5,84 @@
     import { ethers } from "ethers";
     import anime from 'animejs/lib/anime.es.js';
     import { svg_element } from 'svelte/internal';
+    import { chart } from "svelte-apexcharts";
 
     let dex;
     let activePoolNum;
     $: totalSupply = 0
     $: blockNum = 0;
     export let show;
+
+    let tVal = []
+    let cVal = []
+    let price = []
+    let label = []
+    let coins = []
+    let data = {}
+
+    const loadGraph = (eventMsg) => {
+        const res = eventMsg.detail;
+        console.log("loading graph...")
+        tVal = []
+        cVal = []
+        label = []
+        price = []
+        coins = []
+        res.forEach((item,index)=> {
+            tVal.push(item.tVal.value.toNumber())
+            cVal.push(item.cVal.value.toNumber())
+            label.push(' ')
+            let calculate = item.cVal.value.toNumber()/item.tVal.value.toNumber()
+            price.push(calculate.toFixed(3))
+            coins.push(item.name+"/yToken")
+        })
+        console.log(tVal)
+        console.log(cVal)
+
+
+        data = {
+            chart: {
+                type: 'area',
+                stacked : false
+            },
+            dataLabels: {
+                enabled: false
+            },
+            markers: {
+                size: 5,
+            },
+
+            stroke: {
+                curve: 'straight'
+            },
+            colors: ["#ea86a7", "#8cc9dc"],
+        
+            series: [
+                    {
+                        name:'Token Amount',
+                        data: price,
+                    },
+            ],
+            yaxis: [
+                {
+                title: {
+                    text: "Token Amount",
+                    style: {
+                        color: '#ea86a7'
+                    }
+                },
+                labels: {
+                    style: {
+                    colors: "#ea86a7"
+                    }
+                },
+                },
+                
+            ],
+        };
+        show = true;
+    }
+
 
     const loadActivePools = (eventMsg) => {
 
@@ -68,11 +140,13 @@
 
     function  addPoolTest() {
         //dex.addPool('Aurora',15000,20000)
-        dex.exchangeBuy('Bitcoin','10','PAX Gold')
+        dex.exchangeBuy('Pax Gold',10,'Bitcoin')
     }
 
 </script>
-<DeX bind:this={dex} dashboard={true} on:s_getAllActivePools={loadActivePools} on:s_addPool={loadActivePools}></DeX>
+<DeX bind:this={dex} dashboard={true} on:s_getAllActivePools={loadActivePools} 
+                                        on:s_addPool={loadActivePools} 
+                                        on:s_getLast10ValChanges={loadGraph}></DeX>
 <div class="dashboard-container">
     <div class="right-container">
         <div class="bubble">
@@ -92,18 +166,26 @@
         </div>
     </div>
     <div class="left-container">
-        <div>more text</div>
+        <div class="left-top-container">
+            <h2>Recent Price Changes of</h2>
+            <select></select>
+        </div>
+        <div class="graph-container">
+            {#if show }
+               <div use:chart={data}/>
+            {/if}
+        </div>
     </div>
     <div class="bottom-container">
         <div>some text</div>
     </div>
 </div>
 <button on:click={() => {dex.getValChanges()}}>Get Filters</button>
-<button on:click={() => {dex.exchangeBuy('Ether',10,'Bitcoin')}}>Exchange</button>
-{#if show === true}
+<button on:click={() => {dex.exchangeBuy('Bitcoin',5,'Ether')}}>Exchange</button>
 
 
-{/if}
+
+
 
 <style>
     .bubble {

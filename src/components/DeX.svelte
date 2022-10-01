@@ -61,10 +61,10 @@
 
     export const getLast10ValChanges = async () => {
         const flt = contract.filters.PoolValue('Ether')
-        console.log(qryFlt)
         const log = await getEthersLog(contract, flt)  
         const last = log.slice(Math.max(log.length - 10, 0))
         console.log(last)
+        dispatch('s_getLast10ValChanges',last)
     }
 
 
@@ -106,33 +106,6 @@
 
     export let dashboard;
 
-    if( dashboard == true) {
-        getAllActivePools()
-
-    }
-
-
-    function formatTokenListResponse(response) {
-        let allActive = [];
-        response.forEach((item,i) => {
-
-            const obj = {}
-            obj['name'] = item[0]
-            obj['coinAmount'] =  item[1].toNumber()
-            obj['tokenAmount'] = item[2].toNumber()
-            obj['status'] = item[3]
-        
-            console.log(obj)
-
-            //console.log(item)
-            // const cut = item.slice(4,7)
-            //const parsed = JSON.parse(JSON.stringify(item))
-            allActive.push(obj)
-            //console.log(parsed)
-        })
-        return allActive
-    }
-
     const parseEtherjsLog = (parsed) => {
     let parsedEvent = {}
         for (let i = 0; i < parsed.args.length; i++) {
@@ -157,5 +130,34 @@
         return parsedEvents
     }
 
+
+    if( dashboard == true) {
+        getAllActivePools()
+        getLast10ValChanges()
+    }
+
+
+    function formatTokenListResponse(response) {
+        let allActive = [];
+        response.forEach((item,i) => {
+
+            const obj = {}
+            obj['name'] = item[0]
+            obj['coinAmount'] =  item[1].toNumber()
+            obj['tokenAmount'] = item[2].toNumber()
+            obj['status'] = item[3]
+        
+            console.log(obj)
+
+            //console.log(item)
+            // const cut = item.slice(4,7)
+            //const parsed = JSON.parse(JSON.stringify(item))
+            allActive.push(obj)
+            //console.log(parsed)
+        })
+        return allActive
+    }
+
+    
 
 </script>
