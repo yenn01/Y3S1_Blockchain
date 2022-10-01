@@ -25,6 +25,8 @@
     "ethers": "^5.7.1",
     "sirv-cli": "^2.0.0",
     "svelte-loading-spinners": "^0.1.7",
+    "svelte-modals": "^1.2.0",
+    "sveltestrap": "^5.9.0",
     "truffle": "^5.5.31"
   }
 }
