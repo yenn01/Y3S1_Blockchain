@@ -12,6 +12,9 @@ contract DeX{
     // 3. Bitcoin price = 19,758.00 usd
     // 4. PAX Gold price = 1,685.00 usd
 
+    //Add code to convert 1 ETH -> Y4 Token 
+    //Add mapping for balance(address)
+
     struct pool{
         string cryptoName;
         uint cryptoAmt;
@@ -25,12 +28,22 @@ contract DeX{
 
     event OwnerSet(address indexed oldOwner, address indexed newOwner);
 
+    constructor() {
+        owner = msg.sender; 
+        emit OwnerSet(address(0), owner);
+        addPool('Bitcoin', 101, 20000);
+        addPool('Ether', 1359, 20000);
+        addPool('PAX Gold', 1187, 20000);
+        //console.log("Pool created successfully. Liquidity Provider:", msg.sender);
+    }
+
     modifier isOwner() {
         require(msg.sender == owner, "Caller is not owner");
         _;
     }
 
     modifier inList(string memory cName, int funcName) {
+        //Used to validate add pool
         if(funcName == 0){
             bool resultStatus = true;
             for (uint j=0; j<cryptoListNum; j++) {
@@ -41,6 +54,7 @@ contract DeX{
             }
             require(resultStatus, string(abi.encodePacked("Cryptocurrency ", cName, " already exist.")));
         }
+        //Used to validate add amount to pool
         else if(funcName == 1){
             bool resultStatus = false;
             for (uint j=0; j<cryptoListNum; j++) {
@@ -51,6 +65,7 @@ contract DeX{
             }
             require(resultStatus, string(abi.encodePacked("Cryptocurrency ", cName, " is not exist.")));
         }
+        //Used to validate edit pool
         else if(funcName == 2 && bytes(cName).length!=0){
             bool resultStatus = true;
             for (uint j=0; j<cryptoListNum; j++) {
@@ -61,6 +76,7 @@ contract DeX{
             }
             require(resultStatus, string(abi.encodePacked("Cryptocurrency ", cName, " already exist.")));
         }
+        //Used to validate exchange buy and sell crypto
         else if(funcName == 3){
             bool resultStatus = false;
             for (uint j=0; j<cryptoListNum; j++) {
@@ -109,6 +125,7 @@ contract DeX{
                 break;
             }
         }
+        //Add write success or fail return/emit
     }
 
     // left the newCName empty if no update
@@ -130,6 +147,7 @@ contract DeX{
         cryptoList[j].cryptoAmt = cVal;
         cryptoList[j].tokenAmt = tVal;
         cryptoList[j].cryptoStatus = pStatus;
+         //Add write success or fail return/emit
     }
 
     function listAllPool() public isOwner view returns(pool[] memory){
@@ -146,15 +164,6 @@ contract DeX{
             if(cryptoList[j].cryptoStatus == true) tempPool[j]=cryptoList[j];
         }
         return tempPool;
-    }
-
-    constructor() {
-        owner = msg.sender; 
-        emit OwnerSet(address(0), owner);
-        addPool('Bitcoin', 101, 20000);
-        addPool('Ether', 1359, 20000);
-        addPool('PAX Gold', 1187, 20000);
-        //console.log("Pool created successfully. Liquidity Provider:", msg.sender);
     }
 
     // Buy exchangeAmt of cryptoType with X targetCryptoType
