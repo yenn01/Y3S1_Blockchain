@@ -50,7 +50,7 @@ contract DeX{
     mapping(address => uint256) private yBalances;
 
     uint cryptoListNum = 0;
-    uint decimalPlace = 10000;
+    //uint decimalPlace = 10000;
 
     event OwnerSet(address indexed oldOwner, address indexed newOwner);
     event PoolValue(string indexed cryptoName,uint indexed cVal, uint indexed tVal);
@@ -60,9 +60,10 @@ contract DeX{
     constructor() {
         owner = msg.sender; 
         emit OwnerSet(address(0), owner);
-        addPool('wBitcoin', 100, 1469);
-        addPool('Aurora', 1359, 20000);
-        addPool('BNB', 9310, 2000);
+        //Values are in GWEI
+        initPool('wBitcoin', 100000000000, 1469000000000);
+        initPool('BAT', 875010000000000, 200000000000);
+        initPool('BNB', 931000000000000, 2000000000000);
         //console.log("Pool created successfully. Liquidity Provider:", msg.sender);
     }
 
@@ -128,6 +129,14 @@ contract DeX{
             cryptoList[cryptoListNum] = pool(cName, cVal, tVal, true);
             cryptoListNum ++;
             yBalances[msg.sender] -= tVal;
+        }
+        emit PoolValue(cName,cVal,tVal);
+    }
+
+    function initPool(string memory cName, uint cVal, uint tVal) public isOwner inList(cName, 0){
+        if(bytes(cName).length!=0){
+            cryptoList[cryptoListNum] = pool(cName, cVal, tVal, true);
+            cryptoListNum ++;
         }
         emit PoolValue(cName,cVal,tVal);
     }
@@ -217,7 +226,7 @@ contract DeX{
                 }
                 // deduct amout of cryptoType frist to get the amount token required
                 // For example buy 10 bitcoin(cryptoType) with ether (targetCryptoType), in here we deduct 10 bitcoin from the pool to calculate the amount of token required.
-                y_remain = roundOff(((cryptoList[j].tokenAmt*cryptoList[j].cryptoAmt*decimalPlace)/(cryptoList[j].cryptoAmt-exchangeAmt)));
+                y_remain = ((cryptoList[j].tokenAmt*cryptoList[j].cryptoAmt)/(cryptoList[j].cryptoAmt-exchangeAmt));
                 amtTokenRequired = y_remain-cryptoList[j].tokenAmt;
                 cryptoList[j].tokenAmt = y_remain;
                 cryptoList[j].cryptoAmt -= exchangeAmt;
@@ -231,7 +240,7 @@ contract DeX{
         for(i=0; i<cryptoListNum; i++){
             if(keccak256(abi.encodePacked(cryptoList[i].cryptoName)) == keccak256(abi.encodePacked(targetCryptoType))){
                 // decrease the token in the ether (targetCryptoType) pool to calculate how much targetCryptoType we should receive.
-                y_remain = roundOff((cryptoList[i].tokenAmt*cryptoList[i].cryptoAmt*decimalPlace)/(cryptoList[i].tokenAmt-amtTokenRequired));
+                y_remain = (cryptoList[i].tokenAmt*cryptoList[i].cryptoAmt)/(cryptoList[i].tokenAmt-amtTokenRequired);
                 amtCryptoRequired = y_remain-cryptoList[i].cryptoAmt;
                 cryptoList[i].tokenAmt -= amtTokenRequired;
                 cryptoList[i].cryptoAmt = y_remain;
@@ -253,7 +262,7 @@ contract DeX{
         for(j=0; j<cryptoListNum; j++){
             if(keccak256(abi.encodePacked(cryptoList[j].cryptoName)) == keccak256(abi.encodePacked(cryptoType))){
                 //                   (           x           *           y          )/(           x           +    ^x     )
-                y_remain = roundOff(((cryptoList[j].cryptoAmt*cryptoList[j].tokenAmt*decimalPlace)/(cryptoList[j].cryptoAmt+exchangeAmt)));
+                y_remain = ((cryptoList[j].cryptoAmt*cryptoList[j].tokenAmt)/(cryptoList[j].cryptoAmt+exchangeAmt));
                 poolOut = cryptoList[j].tokenAmt-y_remain;
                 cryptoList[j].tokenAmt = y_remain;
                 cryptoList[j].cryptoAmt += exchangeAmt;
@@ -273,7 +282,8 @@ contract DeX{
                     revert();
                 }
                 //                   (           x          *           y           )/(           x          +   ^x  )
-                y_remain = roundOff(((cryptoList[i].tokenAmt*cryptoList[i].cryptoAmt*decimalPlace)/(cryptoList[i].tokenAmt+poolOut)));
+                //y_remain = roundOff(((cryptoList[i].tokenAmt*cryptoList[i].cryptoAmt*decimalPlace)/(cryptoList[i].tokenAmt+poolOut)));
+                y_remain = ((cryptoList[i].tokenAmt*cryptoList[i].cryptoAmt)/(cryptoList[i].tokenAmt+poolOut));
                 returnAmt = cryptoList[i].cryptoAmt-y_remain;
                 cryptoList[i].tokenAmt += poolOut;
                 cryptoList[i].cryptoAmt = y_remain;
@@ -284,18 +294,18 @@ contract DeX{
         return (targetCryptoType, returnAmt);
     }
 
-    function roundOff(uint unprocessedInput) public view returns(uint){
-        // 4 decimalPlace, example input 188776261, it will return 18878
-        uint input = unprocessedInput;
-        uint temp = uint(input/decimalPlace);
-        uint tempNet = uint(input-(temp*decimalPlace));
-        uint ans = 0;
-        if(tempNet >= uint(decimalPlace/2)){
-            ans = uint((input+decimalPlace)/decimalPlace);
-        }
-        else{
-            ans = uint(input/decimalPlace);
-        }
-        return(ans);
-    }
+    // function roundOff(uint unprocessedInput) public view returns(uint){
+    //     // 4 decimalPlace, example input 188776261, it will return 18878
+    //     uint input = unprocessedInput;
+    //     uint temp = uint(input/decimalPlace);
+    //     uint tempNet = uint(input-(temp*decimalPlace));
+    //     uint ans = 0;
+    //     if(tempNet >= uint(decimalPlace/2)){
+    //         ans = uint((input+decimalPlace)/decimalPlace);
+    //     }
+    //     else{
+    //         ans = uint(input/decimalPlace);
+    //     }
+    //     return(ans);
+    // }
 }

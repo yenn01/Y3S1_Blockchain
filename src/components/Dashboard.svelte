@@ -34,11 +34,12 @@
         price = []
 
         res.forEach((item,index)=> {
-            tVal.push(item.tVal.value.toNumber())
-            cVal.push(item.cVal.value.toNumber())
+            // tVal.push(item.tVal.value.toNumber())
+            // cVal.push(item.cVal.value.toNumber())
             label.push(' ')
             let calculate = item.tVal.value.toNumber()/item.cVal.value.toNumber()
-            price.push(calculate.toFixed(3))
+            console.log(calculate.toString())
+            price.push(calculate)
             console.log()
            
         })
@@ -79,10 +80,11 @@
                             color: '#ea86a7'
                         }
                     },
+                    tickAmount: 4,
                     labels: {
                         style:{
                             colors: ['#ea86a7']
-                        }
+                        },
                     }
 
                 },
@@ -116,7 +118,7 @@
             //select.value = eventMsg.detail[0].name+" / yToken"
             
             eventMsg.detail.forEach((item,index)=> {
-                    totalSupply += item.tokenAmount;
+                    totalSupply += item.tokenAmount / Math.pow(10,9);
                     
                     coins.push({id:counter,name:item.name+" / yToken"})
             })
@@ -131,7 +133,7 @@
             getBlock()
             console.log("name")
             console.log(coins)
-            
+            yTokenValue()
     //     console.log(allActive)
 
     //     // const keys = eventMsg.detail.slice(4,7)
@@ -169,11 +171,36 @@
 
     }
 
+    let ethPrice = 0;
+    let yVolume = 0;
+    const yTokenValue = async () => {
+        const url = 'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd'
+        const response = await fetch(url).then(res => res.json()).then((passed) => {
+           ethPrice = passed.ethereum.usd;
+           yVolume = totalSupply * ethPrice;
+        })
+        let element = document.querySelector('#yVolume');
+
+        anime({
+                targets: element,
+                innerHTML: [0,yVolume],
+                easing: 'easeOutExpo',
+                round:1,
+                duration:2000,            
+                update: function(a) {
+                    const value = a.animations[0].currentValue;
+                    let nf = new Intl.NumberFormat('en-US');
+                    const formattedNumber= nf.format(value);
+                    element.innerHTML = formattedNumber;
+                }
+            })
+    }
+
    
 
     function  addPoolTest() {
         //dex.addPool('Aurora',15000,20000)
-        dex.exchangeBuy('Pax Gold',10,'Bitcoin')
+        dex.exchangeBuy('BNB',10,'wBitcoin')
     }
 
     
@@ -186,7 +213,7 @@
     <div class="right-container">
         <div class="bubble">
             <h1 id="totalSupply">{totalSupply}</h1>
-            <p>Total Supply</p>
+            <p>Total yTokens in Pool</p>
             
         </div>
         <div class="bubble">
@@ -197,6 +224,11 @@
         <div class="bubble">
             <h1 id="latestBlock">{blockNum}</h1>
             <p>Latest Block</p>
+            
+        </div>
+        <div class="bubble">
+            <h1><span id="yVolume">{yVolume}</span> <span class="dollar-sign">$</span></h1>
+            <p>yToken Total Volume Price</p>
             
         </div>
     </div>
@@ -228,7 +260,7 @@
     </div>
 </div>
 <button on:click={() => {dex.getValChanges()}}>Get Filters</button>
-<button on:click={() => {dex.exchangeBuy('PAX Gold',20,'Ether')}}>Exchange</button>
+<button on:click={() => {dex.exchangeBuy('wBitcoin',20,'BNB')}}>Exchange</button>
 <button on:click={() => {dex.deposit(5)}}>Deposit</button>
 
 
@@ -236,6 +268,11 @@
 
 
 <style>
+    .dollar-sign {
+        font-size: 3rem;
+        color: var(--theme-color-bg)
+    }
+
     .bubble {
         padding:1rem;
     }
@@ -250,6 +287,11 @@
     #latestBlock{
         color:var(--theme-color-third)
     }
+
+    #yVolume {
+        color:var(--theme-color-second)
+    }
+    
 
     p {
         margin:0 !important;

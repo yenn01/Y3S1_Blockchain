@@ -9,7 +9,7 @@
 
     const dispatch = createEventDispatcher();
 
-    const contractAddr = '0xc7fc1eFB3bdbe74C13f04cFf6f5d8756F12Dc5d6'
+    const contractAddr = '0x8c7aF6f0030e708b26FCE0B0Aa72Dcd955E2dC18'
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     let contract = new ethers.Contract(contractAddr, abi.abi, provider);
@@ -179,8 +179,8 @@
 
             const obj = {}
             obj['name'] = item[0]
-            obj['coinAmount'] =  item[1].toNumber()
-            obj['tokenAmount'] = item[2].toNumber()
+            obj['coinAmount'] =  item[1]
+            obj['tokenAmount'] = item[2]
             obj['status'] = item[3]
         
             console.log(obj)
