@@ -8,7 +8,7 @@
 
     const dispatch = createEventDispatcher();
 
-    const contractAddr = '0x2B2023090039490b2e1A530A81ff677ccB310C7c'
+    const contractAddr = '0xcef28702d7577BE48218409A3B45599e964Dc4F3'
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     let contract = new ethers.Contract(contractAddr, abi.abi, provider);
@@ -109,6 +109,12 @@
     if( dashboard == true) {
         getAllActivePools()
 
+    }
+
+    export let swap;
+
+    if(swap == true){
+        getAllActivePools();
     }
 
 

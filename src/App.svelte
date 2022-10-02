@@ -15,17 +15,20 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
  	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
     <link href="https://pvinis.github.io/iosevka-webfont/3.4.1/iosevka.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@700&display=swap" rel="stylesheet">
 </svelte:head>
 
 <main>
     <Toast></Toast>
     <Route path="/">  </Route>
-    <Header></Header>
     <div class="component-container">
         <Route path="/dashboard">
+            <Header></Header>
             <Dashboard></Dashboard>
         </Route>
         <Route path="/swap">
+            <Header></Header>
 			<Swap></Swap>
         </Route>	
         <Route path="/about">
@@ -47,9 +50,8 @@
 
 	:global(body){
 		/* background-color:darkseagreen; */
-		background: #282c34 !important;
+		background: #282c34 !important; 
 		min-height: 96vh;
-        
 	}
 	main {
 		text-align: center;
