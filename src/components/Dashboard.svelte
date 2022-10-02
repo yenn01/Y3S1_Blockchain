@@ -6,6 +6,7 @@
     import anime from 'animejs/lib/anime.es.js';
     import { svg_element } from 'svelte/internal';
     import { chart } from "svelte-apexcharts";
+    import {defaultRecent} from '../stores/defaultRecent.js'
 
     let dex;
     let activePoolNum;
@@ -17,8 +18,12 @@
     let cVal = []
     let price = []
     let label = []
-    let coins = []
+    $: coins = []
     let data = {}
+    let select
+    let counter = 0
+    let selected
+    let defaultToken
 
     const loadGraph = (eventMsg) => {
         const res = eventMsg.detail;
@@ -27,23 +32,26 @@
         cVal = []
         label = []
         price = []
-        coins = []
+
         res.forEach((item,index)=> {
             tVal.push(item.tVal.value.toNumber())
             cVal.push(item.cVal.value.toNumber())
             label.push(' ')
-            let calculate = item.cVal.value.toNumber()/item.tVal.value.toNumber()
+            let calculate = item.tVal.value.toNumber()/item.cVal.value.toNumber()
             price.push(calculate.toFixed(3))
-            coins.push(item.name+"/yToken")
+            console.log()
+           
         })
-        console.log(tVal)
-        console.log(cVal)
+        console.log(coins)
 
 
         data = {
             chart: {
                 type: 'area',
-                stacked : false
+                stacked : false,
+                toolbar: {
+                    show:false
+                }
             },
             dataLabels: {
                 enabled: false
@@ -51,7 +59,7 @@
             markers: {
                 size: 5,
             },
-
+            
             stroke: {
                 curve: 'straight'
             },
@@ -65,30 +73,52 @@
             ],
             yaxis: [
                 {
-                title: {
-                    text: "Token Amount",
-                    style: {
-                        color: '#ea86a7'
+                    title: {
+                        text: "Token Amount",
+                        style: {
+                            color: '#ea86a7'
+                        }
+                    },
+                    labels: {
+                        style:{
+                            colors: ['#ea86a7']
+                        }
                     }
-                },
-                labels: {
-                    style: {
-                    colors: "#ea86a7"
-                    }
-                },
+
                 },
                 
             ],
+            xaxis: 
+                {
+                    title: {
+                        text: "Last 10 Pool Transactions",
+                        style: {
+                            color: '#8cc9dc'
+                        }
+                    },
+                    labels: {
+                        style:{
+                            colors: '#8cc9dc'
+                        }
+                    }
+
+                },
+                
+            
         };
         show = true;
     }
 
 
     const loadActivePools = (eventMsg) => {
-
+            coins = []
             console.log(eventMsg.detail)
+            //select.value = eventMsg.detail[0].name+" / yToken"
+            
             eventMsg.detail.forEach((item,index)=> {
                     totalSupply += item.tokenAmount;
+                    
+                    coins.push({id:counter,name:item.name+" / yToken"})
             })
             activePoolNum = eventMsg.detail.length;
             anime({
@@ -99,6 +129,9 @@
                     duration:3000,            
             })
             getBlock()
+            console.log("name")
+            console.log(coins)
+            
     //     console.log(allActive)
 
     //     // const keys = eventMsg.detail.slice(4,7)
@@ -143,8 +176,10 @@
         dex.exchangeBuy('Pax Gold',10,'Bitcoin')
     }
 
+    
+
 </script>
-<DeX bind:this={dex} dashboard={true} on:s_getAllActivePools={loadActivePools} 
+<DeX bind:this={dex} dashboard={true} {defaultToken} on:s_getAllActivePools={loadActivePools} 
                                         on:s_addPool={loadActivePools} 
                                         on:s_getLast10ValChanges={loadGraph}></DeX>
 <div class="dashboard-container">
@@ -167,8 +202,20 @@
     </div>
     <div class="left-container">
         <div class="left-top-container">
-            <h2>Recent Price Changes of</h2>
-            <select></select>
+            <h2>Recent Price Changes of  </h2>
+            {#if coins.length > 0}
+            <select bind:value={selected} on:change={() => {
+                const regexp = /(.+) \/ yToken/g;
+                let match = regexp.exec(selected.name)
+                dex.getLast10ValChanges(match[1])
+            }}>
+                {#each coins as coin}
+                    <option value={coin}>
+                            {coin.name}
+                    </option>
+                {/each}
+            </select>
+            {/if}
         </div>
         <div class="graph-container">
             {#if show }
@@ -181,7 +228,8 @@
     </div>
 </div>
 <button on:click={() => {dex.getValChanges()}}>Get Filters</button>
-<button on:click={() => {dex.exchangeBuy('Bitcoin',5,'Ether')}}>Exchange</button>
+<button on:click={() => {dex.exchangeBuy('PAX Gold',20,'Ether')}}>Exchange</button>
+<button on:click={() => {dex.deposit(5)}}>Deposit</button>
 
 
 
@@ -192,6 +240,11 @@
         padding:1rem;
     }
 
+    .left-top-container {
+        display:flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
 
 
     #latestBlock{
@@ -235,8 +288,8 @@
         border-radius: 10px;
     }
 
-    .right-container div ~ div{
-        margin: 1rem 0 ;
+    .right-container div {
+        margin-bottom: 1rem ;
     }
 
     .left-container{
@@ -248,6 +301,7 @@
         min-height: 40vh;
         flex-shrink: 0;
         flex-basis: 400px;
+        padding:2rem;
     }
 
     .bottom-container {

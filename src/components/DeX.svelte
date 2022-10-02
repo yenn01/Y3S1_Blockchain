@@ -4,11 +4,12 @@
 
     //Used to create dispatch events catched by parent components
     import { createEventDispatcher } from 'svelte';
-    import { keccak256, solidityKeccak256 } from "ethers/lib/utils";
+    import {defaultRecent} from '../stores/defaultRecent'
+    import { merge_ssr_styles } from "svelte/internal";
 
     const dispatch = createEventDispatcher();
 
-    const contractAddr = '0x2B2023090039490b2e1A530A81ff677ccB310C7c'
+    const contractAddr = '0xc7fc1eFB3bdbe74C13f04cFf6f5d8756F12Dc5d6'
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     let contract = new ethers.Contract(contractAddr, abi.abi, provider);
@@ -26,6 +27,22 @@
     }
 
     //Read Functions
+    export function getEther() {
+        contract.getEther().then((res)=> {
+            console.log(res)
+            dispatch('s_getEther',res)
+        })
+    }
+
+    export function getBalanceOf() {
+        contract.balanceOf().then((res)=> {
+            console.log(res)
+            dispatch('s_getEther',res)
+        })
+    }
+
+
+
     export function getAllPools() {
         contract.listAllPool().then((res)=> {
             console.log(res)
@@ -59,8 +76,9 @@
         console.log(log)
     }
 
-    export const getLast10ValChanges = async () => {
-        const flt = contract.filters.PoolValue('Ether')
+    export const getLast10ValChanges = async (coinName) => {
+        console.log(coinName)
+        const flt = contract.filters.PoolValue(coinName)
         const log = await getEthersLog(contract, flt)  
         const last = log.slice(Math.max(log.length - 10, 0))
         console.log(last)
@@ -104,7 +122,22 @@
         })
     }
 
-    export let dashboard;
+    export function deposit(amt) {
+        getSigner()
+        let overrides = { value: utils.parseEther(amt.toString()) }
+        contract.deposit(utils.parseEther(amt.toString()), overrides).then((res)=> {
+            dispatch('s_deposit',res)
+        })
+    }
+
+    export function withdraw(amt) {
+        getSigner()
+        contract.withdraw(amt).then((res)=> {
+            dispatch('s_withdraw',res)
+        })
+    }
+
+    
 
     const parseEtherjsLog = (parsed) => {
     let parsedEvent = {}
@@ -130,11 +163,14 @@
         return parsedEvents
     }
 
-
+    export let dashboard;
+    export let defaultToken = 'Bitcoin';
     if( dashboard == true) {
         getAllActivePools()
-        getLast10ValChanges()
+        getLast10ValChanges($defaultRecent)
     }
+
+
 
 
     function formatTokenListResponse(response) {

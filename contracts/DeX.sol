@@ -22,20 +22,47 @@ contract DeX{
         bool cryptoStatus;
     }
 
+    function deposit(uint256 amount) public payable {
+        require(msg.value == amount);
+        yBalances[msg.sender] += amount;
+        emit Deposited(msg.sender,amount);
+    }
+
+    function withdraw(uint256 amount) public {
+        require(amount <= yBalances[msg.sender]);
+        yBalances[msg.sender] -= amount;
+        payable(msg.sender).transfer(address(this).balance); //Change to call
+        emit Withdrawn(msg.sender,amount);
+    }
+
+    function getEther() public view returns (uint) {
+        return address(this).balance;
+    }
+
+    function balanceOf() public view returns(uint256) {
+        return yBalances[msg.sender];
+    }
+
+    
+
     // act like dictionary in python
     mapping(uint => pool) private cryptoList;
+    mapping(address => uint256) private yBalances;
+
     uint cryptoListNum = 0;
     uint decimalPlace = 10000;
 
     event OwnerSet(address indexed oldOwner, address indexed newOwner);
     event PoolValue(string indexed cryptoName,uint indexed cVal, uint indexed tVal);
+    event Deposited(address indexed addr,uint indexed amount);
+    event Withdrawn(address indexed addr,uint indexed amount);
 
     constructor() {
         owner = msg.sender; 
         emit OwnerSet(address(0), owner);
-        addPool('Bitcoin', 101, 20000);
-        addPool('Ether', 1359, 20000);
-        addPool('PAX Gold', 1187, 20000);
+        addPool('wBitcoin', 100, 1469);
+        addPool('Aurora', 1359, 20000);
+        addPool('BNB', 9310, 2000);
         //console.log("Pool created successfully. Liquidity Provider:", msg.sender);
     }
 
@@ -93,10 +120,14 @@ contract DeX{
         _;
     }
 
-    function addPool(string memory cName, uint cVal, uint tVal) public isOwner inList(cName, 0){
+    function addPool(string memory cName, uint cVal, uint tVal) public inList(cName, 0){
+
+        require(yBalances[msg.sender] >= tVal);
+
         if(bytes(cName).length!=0){
             cryptoList[cryptoListNum] = pool(cName, cVal, tVal, true);
             cryptoListNum ++;
+            yBalances[msg.sender] -= tVal;
         }
         emit PoolValue(cName,cVal,tVal);
     }
