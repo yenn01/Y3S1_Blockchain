@@ -53,6 +53,11 @@
 		background: #282c34 !important; 
 		min-height: 96vh;
 	}
+
+    :global(select) {
+        background-color: var(--theme-color-bg);
+        color:var(--text-color)
+    }
 	main {
 		text-align: center;
 		padding: 1em;

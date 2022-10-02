@@ -5,6 +5,8 @@
     import { ethers } from "ethers";
     import anime from 'animejs/lib/anime.es.js';
     import { svg_element } from 'svelte/internal';
+    import { chart } from "svelte-apexcharts";
+    import {defaultRecent} from '../stores/defaultRecent.js'
 
     let dex;
     let activePoolNum;
@@ -12,11 +14,113 @@
     $: blockNum = 0;
     export let show;
 
-    const loadActivePools = (eventMsg) => {
+    let tVal = []
+    let cVal = []
+    let price = []
+    let label = []
+    $: coins = []
+    let data = {}
+    let select
+    let counter = 0
+    let selected
+    let defaultToken
 
+    const loadGraph = (eventMsg) => {
+        const res = eventMsg.detail;
+        console.log("loading graph...")
+        tVal = []
+        cVal = []
+        label = []
+        price = []
+
+        res.forEach((item,index)=> {
+            // tVal.push(item.tVal.value.toNumber())
+            // cVal.push(item.cVal.value.toNumber())
+            label.push(' ')
+            let calculate = item.tVal.value.toNumber()/item.cVal.value.toNumber()
+            console.log(calculate.toString())
+            price.push(calculate)
+            console.log()
+           
+        })
+        console.log(coins)
+
+
+        data = {
+            chart: {
+                type: 'area',
+                stacked : false,
+                toolbar: {
+                    show:false
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            markers: {
+                size: 5,
+            },
+            
+            stroke: {
+                curve: 'straight'
+            },
+            colors: ["#ea86a7", "#8cc9dc"],
+        
+            series: [
+                    {
+                        name:'Token Amount',
+                        data: price,
+                    },
+            ],
+            yaxis: [
+                {
+                    title: {
+                        text: "Token Amount",
+                        style: {
+                            color: '#ea86a7'
+                        }
+                    },
+                    tickAmount: 4,
+                    labels: {
+                        style:{
+                            colors: ['#ea86a7']
+                        },
+                    }
+
+                },
+                
+            ],
+            xaxis: 
+                {
+                    title: {
+                        text: "Last 10 Pool Transactions",
+                        style: {
+                            color: '#8cc9dc'
+                        }
+                    },
+                    labels: {
+                        style:{
+                            colors: '#8cc9dc'
+                        }
+                    }
+
+                },
+                
+            
+        };
+        show = true;
+    }
+
+
+    const loadActivePools = (eventMsg) => {
+            coins = []
             console.log(eventMsg.detail)
+            //select.value = eventMsg.detail[0].name+" / yToken"
+            
             eventMsg.detail.forEach((item,index)=> {
-                    totalSupply += item.tokenAmount;
+                    totalSupply += item.tokenAmount / Math.pow(10,9);
+                    
+                    coins.push({id:counter,name:item.name+" / yToken"})
             })
             activePoolNum = eventMsg.detail.length;
             anime({
@@ -27,6 +131,9 @@
                     duration:3000,            
             })
             getBlock()
+            console.log("name")
+            console.log(coins)
+            yTokenValue()
     //     console.log(allActive)
 
     //     // const keys = eventMsg.detail.slice(4,7)
@@ -64,20 +171,49 @@
 
     }
 
+    let ethPrice = 0;
+    let yVolume = 0;
+    const yTokenValue = async () => {
+        const url = 'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd'
+        const response = await fetch(url).then(res => res.json()).then((passed) => {
+           ethPrice = passed.ethereum.usd;
+           yVolume = totalSupply * ethPrice;
+        })
+        let element = document.querySelector('#yVolume');
+
+        anime({
+                targets: element,
+                innerHTML: [0,yVolume],
+                easing: 'easeOutExpo',
+                round:1,
+                duration:2000,            
+                update: function(a) {
+                    const value = a.animations[0].currentValue;
+                    let nf = new Intl.NumberFormat('en-US');
+                    const formattedNumber= nf.format(value);
+                    element.innerHTML = formattedNumber;
+                }
+            })
+    }
+
    
 
     function  addPoolTest() {
         //dex.addPool('Aurora',15000,20000)
-        dex.exchangeBuy('Bitcoin','10','PAX Gold')
+        dex.exchangeBuy('BNB',10,'wBitcoin')
     }
 
+    
+
 </script>
-<DeX bind:this={dex} dashboard={true} on:s_getAllActivePools={loadActivePools} on:s_addPool={loadActivePools}></DeX>
+<DeX bind:this={dex} dashboard={true} {defaultToken} on:s_getAllActivePools={loadActivePools} 
+                                        on:s_addPool={loadActivePools} 
+                                        on:s_getLast10ValChanges={loadGraph}></DeX>
 <div class="dashboard-container">
     <div class="right-container">
         <div class="bubble">
             <h1 id="totalSupply">{totalSupply}</h1>
-            <p>Total Supply</p>
+            <p>Total yTokens in Pool</p>
             
         </div>
         <div class="bubble">
@@ -90,31 +226,72 @@
             <p>Latest Block</p>
             
         </div>
+        <div class="bubble">
+            <h1><span id="yVolume">{yVolume}</span> <span class="dollar-sign">$</span></h1>
+            <p>yToken Total Volume Price</p>
+            
+        </div>
     </div>
     <div class="left-container">
-        <div>more text</div>
+        <div class="left-top-container">
+            <h2>Recent Price Changes of  </h2>
+            {#if coins.length > 0}
+            <select bind:value={selected} on:change={() => {
+                const regexp = /(.+) \/ yToken/g;
+                let match = regexp.exec(selected.name)
+                dex.getLast10ValChanges(match[1])
+            }}>
+                {#each coins as coin}
+                    <option value={coin}>
+                            {coin.name}
+                    </option>
+                {/each}
+            </select>
+            {/if}
+        </div>
+        <div class="graph-container">
+            {#if show }
+               <div use:chart={data}/>
+            {/if}
+        </div>
     </div>
     <div class="bottom-container">
         <div>some text</div>
     </div>
 </div>
 <button on:click={() => {dex.getValChanges()}}>Get Filters</button>
-<button on:click={() => {dex.exchangeBuy('Ether',10,'Bitcoin')}}>Exchange</button>
-{#if show === true}
+<button on:click={() => {dex.exchangeBuy('wBitcoin',20,'BNB')}}>Exchange</button>
+<button on:click={() => {dex.deposit(5)}}>Deposit</button>
 
 
-{/if}
+
+
 
 <style>
+    .dollar-sign {
+        font-size: 3rem;
+        color: var(--theme-color-bg)
+    }
+
     .bubble {
         padding:1rem;
     }
 
+    .left-top-container {
+        display:flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
 
 
     #latestBlock{
         color:var(--theme-color-third)
     }
+
+    #yVolume {
+        color:var(--theme-color-second)
+    }
+    
 
     p {
         margin:0 !important;
@@ -153,8 +330,8 @@
         border-radius: 10px;
     }
 
-    .right-container div ~ div{
-        margin: 1rem 0 ;
+    .right-container div {
+        margin-bottom: 1rem ;
     }
 
     .left-container{
@@ -166,6 +343,7 @@
         min-height: 40vh;
         flex-shrink: 0;
         flex-basis: 400px;
+        padding:2rem;
     }
 
     .bottom-container {

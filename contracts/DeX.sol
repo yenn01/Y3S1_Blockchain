@@ -22,19 +22,48 @@ contract DeX{
         bool cryptoStatus;
     }
 
+    function deposit(uint256 amount) public payable {
+        require(msg.value == amount);
+        yBalances[msg.sender] += amount;
+        emit Deposited(msg.sender,amount);
+    }
+
+    function withdraw(uint256 amount) public {
+        require(amount <= yBalances[msg.sender]);
+        yBalances[msg.sender] -= amount;
+        payable(msg.sender).transfer(address(this).balance); //Change to call
+        emit Withdrawn(msg.sender,amount);
+    }
+
+    function getEther() public view returns (uint) {
+        return address(this).balance;
+    }
+
+    function balanceOf() public view returns(uint256) {
+        return yBalances[msg.sender];
+    }
+
+    
+
     // act like dictionary in python
     mapping(uint => pool) private cryptoList;
+    mapping(address => uint256) private yBalances;
+
     uint cryptoListNum = 0;
+    //uint decimalPlace = 10000;
 
     event OwnerSet(address indexed oldOwner, address indexed newOwner);
     event PoolValue(string indexed cryptoName,uint indexed cVal, uint indexed tVal);
+    event Deposited(address indexed addr,uint indexed amount);
+    event Withdrawn(address indexed addr,uint indexed amount);
 
     constructor() {
         owner = msg.sender; 
         emit OwnerSet(address(0), owner);
-        addPool('Bitcoin', 101, 20000);
-        addPool('Ether', 1359, 20000);
-        addPool('PAX Gold', 1187, 20000);
+        //Values are in GWEI
+        initPool('wBitcoin', 100000000000, 1469000000000);
+        initPool('BAT', 875010000000000, 200000000000);
+        initPool('BNB', 931000000000000, 2000000000000);
         //console.log("Pool created successfully. Liquidity Provider:", msg.sender);
     }
 
@@ -92,7 +121,19 @@ contract DeX{
         _;
     }
 
-    function addPool(string memory cName, uint cVal, uint tVal) public isOwner inList(cName, 0){
+    function addPool(string memory cName, uint cVal, uint tVal) public inList(cName, 0){
+
+        require(yBalances[msg.sender] >= tVal);
+
+        if(bytes(cName).length!=0){
+            cryptoList[cryptoListNum] = pool(cName, cVal, tVal, true);
+            cryptoListNum ++;
+            yBalances[msg.sender] -= tVal;
+        }
+        emit PoolValue(cName,cVal,tVal);
+    }
+
+    function initPool(string memory cName, uint cVal, uint tVal) public isOwner inList(cName, 0){
         if(bytes(cName).length!=0){
             cryptoList[cryptoListNum] = pool(cName, cVal, tVal, true);
             cryptoListNum ++;
@@ -173,48 +214,57 @@ contract DeX{
     // Buy exchangeAmt of cryptoType with X targetCryptoType
     function exchangeBuy(string memory cryptoType, uint exchangeAmt, string memory targetCryptoType) public inList(cryptoType, 3) inList(targetCryptoType, 3) returns(string memory, uint){
         // Exchange cryptoType to token
-        uint token = 0;
+        uint amtTokenRequired = 0;
         uint j;
         uint i;
+        uint y_remain;
         for(j=0; j<cryptoListNum; j++){
             if(keccak256(abi.encodePacked(cryptoList[j].cryptoName)) == keccak256(abi.encodePacked(cryptoType))){
                 if(cryptoList[j].cryptoAmt==0 || cryptoList[j].cryptoAmt<exchangeAmt){
                     //console.log(string(abi.encodePacked("Cryptocurrency ", cryptoList[j].cryptoName, " pool is not enough. Maximum amount: ", Strings.toString(cryptoList[j].cryptoAmt))));
                     revert();
                 }
-                token = ((cryptoList[j].tokenAmt*cryptoList[j].cryptoAmt)/(cryptoList[j].cryptoAmt-exchangeAmt))-cryptoList[j].tokenAmt;
-                cryptoList[j].tokenAmt -= token;
-                cryptoList[j].cryptoAmt += exchangeAmt;
+                // deduct amout of cryptoType frist to get the amount token required
+                // For example buy 10 bitcoin(cryptoType) with ether (targetCryptoType), in here we deduct 10 bitcoin from the pool to calculate the amount of token required.
+                y_remain = ((cryptoList[j].tokenAmt*cryptoList[j].cryptoAmt)/(cryptoList[j].cryptoAmt-exchangeAmt));
+                amtTokenRequired = y_remain-cryptoList[j].tokenAmt;
+                cryptoList[j].tokenAmt = y_remain;
+                cryptoList[j].cryptoAmt -= exchangeAmt;
                 emit PoolValue(cryptoList[j].cryptoName,cryptoList[j].cryptoAmt,cryptoList[j].tokenAmt);
                 break;
             }
         }
 
         // Token to targetCryptoType
-        uint returnAmt = 0;
+        uint amtCryptoRequired = 0;
         for(i=0; i<cryptoListNum; i++){
             if(keccak256(abi.encodePacked(cryptoList[i].cryptoName)) == keccak256(abi.encodePacked(targetCryptoType))){
-                returnAmt = ((cryptoList[i].tokenAmt*cryptoList[i].cryptoAmt)/(cryptoList[i].tokenAmt-token))-cryptoList[i].cryptoAmt;
-                cryptoList[i].tokenAmt += token;
-                cryptoList[i].cryptoAmt -= returnAmt;
+                // decrease the token in the ether (targetCryptoType) pool to calculate how much targetCryptoType we should receive.
+                y_remain = (cryptoList[i].tokenAmt*cryptoList[i].cryptoAmt)/(cryptoList[i].tokenAmt-amtTokenRequired);
+                amtCryptoRequired = y_remain-cryptoList[i].cryptoAmt;
+                cryptoList[i].tokenAmt -= amtTokenRequired;
+                cryptoList[i].cryptoAmt = y_remain;
                 emit PoolValue(cryptoList[i].cryptoName,cryptoList[i].cryptoAmt,cryptoList[i].tokenAmt);
                 break;
             }
         }
         
-        return (targetCryptoType, returnAmt);
+        return (targetCryptoType, amtCryptoRequired);
     }
 
     // Sell exchangeAmt of cryptoType to X TargetCryptoType
     function exchangeSell(string memory cryptoType, uint exchangeAmt, string memory targetCryptoType) public inList(cryptoType, 3) inList(targetCryptoType, 3) returns(string memory, uint){
         // Exchange cryptoType to token
-        uint token = 0;
+        uint poolOut = 0;
         uint i;
         uint j;
+        uint y_remain;
         for(j=0; j<cryptoListNum; j++){
             if(keccak256(abi.encodePacked(cryptoList[j].cryptoName)) == keccak256(abi.encodePacked(cryptoType))){
-                token = cryptoList[j].tokenAmt-((cryptoList[j].tokenAmt*cryptoList[j].cryptoAmt)/(cryptoList[j].cryptoAmt+exchangeAmt));
-                cryptoList[j].tokenAmt -= token;
+                //                   (           x           *           y          )/(           x           +    ^x     )
+                y_remain = ((cryptoList[j].cryptoAmt*cryptoList[j].tokenAmt)/(cryptoList[j].cryptoAmt+exchangeAmt));
+                poolOut = cryptoList[j].tokenAmt-y_remain;
+                cryptoList[j].tokenAmt = y_remain;
                 cryptoList[j].cryptoAmt += exchangeAmt;
                 emit PoolValue(cryptoList[j].cryptoName,cryptoList[j].cryptoAmt,cryptoList[j].tokenAmt);
                 break;
@@ -227,18 +277,35 @@ contract DeX{
             if(keccak256(abi.encodePacked(cryptoList[i].cryptoName)) == keccak256(abi.encodePacked(targetCryptoType))){
                 if(cryptoList[i].cryptoAmt==0){
                     //console.log(string(abi.encodePacked("Cryptocurrency ", cryptoList[i].cryptoName, " pool is empty.")));
-                    cryptoList[j].tokenAmt += token;
+                    cryptoList[j].tokenAmt += poolOut;
                     cryptoList[j].cryptoAmt -= exchangeAmt;
                     revert();
                 }
-                returnAmt = cryptoList[i].cryptoAmt-((cryptoList[i].tokenAmt*cryptoList[i].cryptoAmt)/(cryptoList[i].tokenAmt+token));
-                cryptoList[i].tokenAmt += token;
-                cryptoList[i].cryptoAmt -= returnAmt;
+                //                   (           x          *           y           )/(           x          +   ^x  )
+                //y_remain = roundOff(((cryptoList[i].tokenAmt*cryptoList[i].cryptoAmt*decimalPlace)/(cryptoList[i].tokenAmt+poolOut)));
+                y_remain = ((cryptoList[i].tokenAmt*cryptoList[i].cryptoAmt)/(cryptoList[i].tokenAmt+poolOut));
+                returnAmt = cryptoList[i].cryptoAmt-y_remain;
+                cryptoList[i].tokenAmt += poolOut;
+                cryptoList[i].cryptoAmt = y_remain;
                 emit PoolValue(cryptoList[i].cryptoName,cryptoList[i].cryptoAmt,cryptoList[i].tokenAmt);
                 break;
             }
         }
-        
         return (targetCryptoType, returnAmt);
     }
+
+    // function roundOff(uint unprocessedInput) public view returns(uint){
+    //     // 4 decimalPlace, example input 188776261, it will return 18878
+    //     uint input = unprocessedInput;
+    //     uint temp = uint(input/decimalPlace);
+    //     uint tempNet = uint(input-(temp*decimalPlace));
+    //     uint ans = 0;
+    //     if(tempNet >= uint(decimalPlace/2)){
+    //         ans = uint((input+decimalPlace)/decimalPlace);
+    //     }
+    //     else{
+    //         ans = uint(input/decimalPlace);
+    //     }
+    //     return(ans);
+    // }
 }

@@ -4,7 +4,8 @@
 
     //Used to create dispatch events catched by parent components
     import { createEventDispatcher } from 'svelte';
-    import { keccak256, solidityKeccak256 } from "ethers/lib/utils";
+    import {defaultRecent} from '../stores/defaultRecent'
+    import { merge_ssr_styles } from "svelte/internal";
 
     const dispatch = createEventDispatcher();
 
@@ -26,6 +27,22 @@
     }
 
     //Read Functions
+    export function getEther() {
+        contract.getEther().then((res)=> {
+            console.log(res)
+            dispatch('s_getEther',res)
+        })
+    }
+
+    export function getBalanceOf() {
+        contract.balanceOf().then((res)=> {
+            console.log(res)
+            dispatch('s_getEther',res)
+        })
+    }
+
+
+
     export function getAllPools() {
         contract.listAllPool().then((res)=> {
             console.log(res)
@@ -59,12 +76,13 @@
         console.log(log)
     }
 
-    export const getLast10ValChanges = async () => {
-        const flt = contract.filters.PoolValue('Ether')
-        console.log(qryFlt)
+    export const getLast10ValChanges = async (coinName) => {
+        console.log(coinName)
+        const flt = contract.filters.PoolValue(coinName)
         const log = await getEthersLog(contract, flt)  
         const last = log.slice(Math.max(log.length - 10, 0))
         console.log(last)
+        dispatch('s_getLast10ValChanges',last)
     }
 
 
@@ -104,11 +122,12 @@
         })
     }
 
-    export let dashboard;
-
-    if( dashboard == true) {
-        getAllActivePools()
-
+    export function deposit(amt) {
+        getSigner()
+        let overrides = { value: utils.parseEther(amt.toString()) }
+        contract.deposit(utils.parseEther(amt.toString()), overrides).then((res)=> {
+            dispatch('s_deposit',res)
+        })
     }
 
     export let swap;
@@ -117,27 +136,14 @@
         getAllActivePools();
     }
 
-
-    function formatTokenListResponse(response) {
-        let allActive = [];
-        response.forEach((item,i) => {
-
-            const obj = {}
-            obj['name'] = item[0]
-            obj['coinAmount'] =  item[1].toNumber()
-            obj['tokenAmount'] = item[2].toNumber()
-            obj['status'] = item[3]
-        
-            console.log(obj)
-
-            //console.log(item)
-            // const cut = item.slice(4,7)
-            //const parsed = JSON.parse(JSON.stringify(item))
-            allActive.push(obj)
-            //console.log(parsed)
+    export function withdraw(amt) {
+        getSigner()
+        contract.withdraw(amt).then((res)=> {
+            dispatch('s_withdraw',res)
         })
-        return allActive
     }
+
+    
 
     const parseEtherjsLog = (parsed) => {
     let parsedEvent = {}
@@ -163,5 +169,37 @@
         return parsedEvents
     }
 
+    export let dashboard;
+    export let defaultToken = 'Bitcoin';
+    if( dashboard == true) {
+        getAllActivePools()
+        getLast10ValChanges($defaultRecent)
+    }
+
+
+
+
+    function formatTokenListResponse(response) {
+        let allActive = [];
+        response.forEach((item,i) => {
+
+            const obj = {}
+            obj['name'] = item[0]
+            obj['coinAmount'] =  item[1]
+            obj['tokenAmount'] = item[2]
+            obj['status'] = item[3]
+        
+            console.log(obj)
+
+            //console.log(item)
+            // const cut = item.slice(4,7)
+            //const parsed = JSON.parse(JSON.stringify(item))
+            allActive.push(obj)
+            //console.log(parsed)
+        })
+        return allActive
+    }
+
+    
 
 </script>
