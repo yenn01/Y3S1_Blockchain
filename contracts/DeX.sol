@@ -25,6 +25,7 @@ contract DeX{
     // act like dictionary in python
     mapping(uint => pool) private cryptoList;
     uint cryptoListNum = 0;
+    uint decimalPlace = 10000;
 
     event OwnerSet(address indexed oldOwner, address indexed newOwner);
     event PoolValue(string indexed cryptoName,uint indexed cVal, uint indexed tVal);
@@ -173,48 +174,57 @@ contract DeX{
     // Buy exchangeAmt of cryptoType with X targetCryptoType
     function exchangeBuy(string memory cryptoType, uint exchangeAmt, string memory targetCryptoType) public inList(cryptoType, 3) inList(targetCryptoType, 3) returns(string memory, uint){
         // Exchange cryptoType to token
-        uint token = 0;
+        uint amtTokenRequired = 0;
         uint j;
         uint i;
+        uint y_remain;
         for(j=0; j<cryptoListNum; j++){
             if(keccak256(abi.encodePacked(cryptoList[j].cryptoName)) == keccak256(abi.encodePacked(cryptoType))){
                 if(cryptoList[j].cryptoAmt==0 || cryptoList[j].cryptoAmt<exchangeAmt){
                     //console.log(string(abi.encodePacked("Cryptocurrency ", cryptoList[j].cryptoName, " pool is not enough. Maximum amount: ", Strings.toString(cryptoList[j].cryptoAmt))));
                     revert();
                 }
-                token = ((cryptoList[j].tokenAmt*cryptoList[j].cryptoAmt)/(cryptoList[j].cryptoAmt-exchangeAmt))-cryptoList[j].tokenAmt;
-                cryptoList[j].tokenAmt -= token;
-                cryptoList[j].cryptoAmt += exchangeAmt;
+                // deduct amout of cryptoType frist to get the amount token required
+                // For example buy 10 bitcoin(cryptoType) with ether (targetCryptoType), in here we deduct 10 bitcoin from the pool to calculate the amount of token required.
+                y_remain = roundOff(((cryptoList[j].tokenAmt*cryptoList[j].cryptoAmt*decimalPlace)/(cryptoList[j].cryptoAmt-exchangeAmt)));
+                amtTokenRequired = y_remain-cryptoList[j].tokenAmt;
+                cryptoList[j].tokenAmt = y_remain;
+                cryptoList[j].cryptoAmt -= exchangeAmt;
                 emit PoolValue(cryptoList[j].cryptoName,cryptoList[j].cryptoAmt,cryptoList[j].tokenAmt);
                 break;
             }
         }
 
         // Token to targetCryptoType
-        uint returnAmt = 0;
+        uint amtCryptoRequired = 0;
         for(i=0; i<cryptoListNum; i++){
             if(keccak256(abi.encodePacked(cryptoList[i].cryptoName)) == keccak256(abi.encodePacked(targetCryptoType))){
-                returnAmt = ((cryptoList[i].tokenAmt*cryptoList[i].cryptoAmt)/(cryptoList[i].tokenAmt-token))-cryptoList[i].cryptoAmt;
-                cryptoList[i].tokenAmt += token;
-                cryptoList[i].cryptoAmt -= returnAmt;
+                // decrease the token in the ether (targetCryptoType) pool to calculate how much targetCryptoType we should receive.
+                y_remain = roundOff((cryptoList[i].tokenAmt*cryptoList[i].cryptoAmt*decimalPlace)/(cryptoList[i].tokenAmt-amtTokenRequired));
+                amtCryptoRequired = y_remain-cryptoList[i].cryptoAmt;
+                cryptoList[i].tokenAmt -= amtTokenRequired;
+                cryptoList[i].cryptoAmt = y_remain;
                 emit PoolValue(cryptoList[i].cryptoName,cryptoList[i].cryptoAmt,cryptoList[i].tokenAmt);
                 break;
             }
         }
         
-        return (targetCryptoType, returnAmt);
+        return (targetCryptoType, amtCryptoRequired);
     }
 
     // Sell exchangeAmt of cryptoType to X TargetCryptoType
     function exchangeSell(string memory cryptoType, uint exchangeAmt, string memory targetCryptoType) public inList(cryptoType, 3) inList(targetCryptoType, 3) returns(string memory, uint){
         // Exchange cryptoType to token
-        uint token = 0;
+        uint poolOut = 0;
         uint i;
         uint j;
+        uint y_remain;
         for(j=0; j<cryptoListNum; j++){
             if(keccak256(abi.encodePacked(cryptoList[j].cryptoName)) == keccak256(abi.encodePacked(cryptoType))){
-                token = cryptoList[j].tokenAmt-((cryptoList[j].tokenAmt*cryptoList[j].cryptoAmt)/(cryptoList[j].cryptoAmt+exchangeAmt));
-                cryptoList[j].tokenAmt -= token;
+                //                   (           x           *           y          )/(           x           +    ^x     )
+                y_remain = roundOff(((cryptoList[j].cryptoAmt*cryptoList[j].tokenAmt*decimalPlace)/(cryptoList[j].cryptoAmt+exchangeAmt)));
+                poolOut = cryptoList[j].tokenAmt-y_remain;
+                cryptoList[j].tokenAmt = y_remain;
                 cryptoList[j].cryptoAmt += exchangeAmt;
                 emit PoolValue(cryptoList[j].cryptoName,cryptoList[j].cryptoAmt,cryptoList[j].tokenAmt);
                 break;
@@ -227,18 +237,34 @@ contract DeX{
             if(keccak256(abi.encodePacked(cryptoList[i].cryptoName)) == keccak256(abi.encodePacked(targetCryptoType))){
                 if(cryptoList[i].cryptoAmt==0){
                     //console.log(string(abi.encodePacked("Cryptocurrency ", cryptoList[i].cryptoName, " pool is empty.")));
-                    cryptoList[j].tokenAmt += token;
+                    cryptoList[j].tokenAmt += poolOut;
                     cryptoList[j].cryptoAmt -= exchangeAmt;
                     revert();
                 }
-                returnAmt = cryptoList[i].cryptoAmt-((cryptoList[i].tokenAmt*cryptoList[i].cryptoAmt)/(cryptoList[i].tokenAmt+token));
-                cryptoList[i].tokenAmt += token;
-                cryptoList[i].cryptoAmt -= returnAmt;
+                //                   (           x          *           y           )/(           x          +   ^x  )
+                y_remain = roundOff(((cryptoList[i].tokenAmt*cryptoList[i].cryptoAmt*decimalPlace)/(cryptoList[i].tokenAmt+poolOut)));
+                returnAmt = cryptoList[i].cryptoAmt-y_remain;
+                cryptoList[i].tokenAmt += poolOut;
+                cryptoList[i].cryptoAmt = y_remain;
                 emit PoolValue(cryptoList[i].cryptoName,cryptoList[i].cryptoAmt,cryptoList[i].tokenAmt);
                 break;
             }
         }
-        
         return (targetCryptoType, returnAmt);
+    }
+
+    function roundOff(uint unprocessedInput) public view returns(uint){
+        // 4 decimalPlace, example input 188776261, it will return 18878
+        uint input = unprocessedInput;
+        uint temp = uint(input/decimalPlace);
+        uint tempNet = uint(input-(temp*decimalPlace));
+        uint ans = 0;
+        if(tempNet >= uint(decimalPlace/2)){
+            ans = uint((input+decimalPlace)/decimalPlace);
+        }
+        else{
+            ans = uint(input/decimalPlace);
+        }
+        return(ans);
     }
 }
