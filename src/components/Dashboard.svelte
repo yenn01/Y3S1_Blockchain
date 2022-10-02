@@ -1,12 +1,12 @@
 <script>
     import { forEach } from '@metamask/jazzicon/colors';
     import { fade } from 'svelte/transition';
-    import DeX from './DeX.svelte';
     import { ethers } from "ethers";
     import anime from 'animejs/lib/anime.es.js';
     import { svg_element } from 'svelte/internal';
     import { chart } from "svelte-apexcharts";
     import {defaultRecent} from '../stores/defaultRecent.js'
+    import DeX from './DeX.svelte';
 
     let dex;
     let activePoolNum;
@@ -217,6 +217,11 @@
             
         </div>
         <div class="bubble">
+            <h1><span id="yVolume">{yVolume}</span> <span class="dollar-sign">$</span></h1>
+            <p>yToken Total Volume Price</p>
+            
+        </div>
+        <div class="bubble">
             <h1 id="activePoolNum">{activePoolNum}</h1>
             <p>Number of Active Pools</p>
             
@@ -226,11 +231,7 @@
             <p>Latest Block</p>
             
         </div>
-        <div class="bubble">
-            <h1><span id="yVolume">{yVolume}</span> <span class="dollar-sign">$</span></h1>
-            <p>yToken Total Volume Price</p>
-            
-        </div>
+        
     </div>
     <div class="left-container">
         <div class="left-top-container">
@@ -309,8 +310,8 @@
         flex-wrap: wrap;
         flex-direction: row-reverse;
         justify-content: space-around;
-        margin:1rem 0
-        ;
+        margin:1rem 0;
+        width:100%;
     }
 
     .dashboard-container > div {

@@ -5,11 +5,12 @@
     //Used to create dispatch events catched by parent components
     import { createEventDispatcher } from 'svelte';
     import {defaultRecent} from '../stores/defaultRecent'
-    import { merge_ssr_styles } from "svelte/internal";
+    import { accountStore } from '../stores/accountStore.js'
+    import { notifications } from "../stores/notifications";
 
     const dispatch = createEventDispatcher();
 
-    const contractAddr = '0x8c7aF6f0030e708b26FCE0B0Aa72Dcd955E2dC18'
+    const contractAddr = '0x64F88cb2e7a490ef3b8f6009eeB581B9bC6dB67A'
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     let contract = new ethers.Contract(contractAddr, abi.abi, provider);
@@ -34,10 +35,10 @@
         })
     }
 
-    export function getBalanceOf() {
-        contract.balanceOf().then((res)=> {
-            console.log(res)
-            dispatch('s_getEther',res)
+    export function getBalanceOf(address) {
+        contract.balanceOf(address).then((res)=> {
+            //console.log(res)
+            dispatch('s_getBalanceOf',res)
         })
     }
 
@@ -125,16 +126,24 @@
     export function deposit(amt) {
         getSigner()
         let overrides = { value: utils.parseEther(amt.toString()) }
-        contract.deposit(utils.parseEther(amt.toString()), overrides).then((res)=> {
-            dispatch('s_deposit',res)
-        })
+        try {
+            contract.deposit(utils.parseEther(amt.toString()), overrides).then((res)=> {
+                dispatch('s_deposit',res)
+            })
+        } catch(e) {
+            notifications.danger(e.message)
+        }
     }
 
     export function withdraw(amt) {
         getSigner()
-        contract.withdraw(amt).then((res)=> {
-            dispatch('s_withdraw',res)
-        })
+        try {
+            contract.withdraw(utils.parseEther(amt.toString())).then((res)=> {
+                dispatch('s_withdraw',res)
+            })
+        } catch(e) {
+            notifications.danger(e.message)
+        }
     }
 
     
@@ -165,9 +174,15 @@
 
     export let dashboard;
     export let defaultToken = 'Bitcoin';
+    export let create;
     if( dashboard == true) {
         getAllActivePools()
         getLast10ValChanges($defaultRecent)
+    }
+
+
+    if(create == true) {
+        getBalanceOf($accountStore)
     }
 
 
