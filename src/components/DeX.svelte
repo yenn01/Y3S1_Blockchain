@@ -91,7 +91,11 @@
         getSigner()
         contract.addPool(name,val*Math.pow(10,9),against*Math.pow(10,9)).then((res)=> {
             dispatch('s_addPool',res)
-        })
+        }).catch((e) => {
+            const regexp =/(.+)\(/g;
+            let match = regexp.exec(e.message)
+            notifications.danger(match[1].toUpperCase(),4000)
+        }) 
     }
 
     export const getAddPoolGas = async (name,val,against) => {
@@ -99,7 +103,7 @@
         await contract.estimateGas.addPool(name,val*Math.pow(10,9),against*Math.pow(10,9)).then((res)=>{
             res = gasFee * res;
             dispatch('s_getAddPoolGas',res); //return in wei
-        });
+        })
     }
 
     export function addAmt(name,val,against) {
@@ -107,6 +111,11 @@
         contract.addAmt(name,val*Math.pow(10,9),against*Math.pow(10,9)).then((res)=> {
             dispatch('s_addAmt',res)
         })
+        .catch((e) => {
+            const regexp =/(.+)\(/g;
+            let match = regexp.exec(e.message)
+            notifications.danger(match[1].toUpperCase(),4000)
+        }) 
     }
 
     export const getAddAmtGas = async (name,val,against) => {
@@ -114,7 +123,7 @@
         await contract.estimateGas.addAmt(name,val*Math.pow(10,9),against*Math.pow(10,9)).then((res)=>{
             res = gasFee * res;
             dispatch('s_getAddAmtGas',res); //return in wei
-        });
+        })
     }
 
     export function editPoolDetail(name,newname,val,against,status) {
@@ -122,6 +131,11 @@
         contract.addAmt(name,val,against).then((res)=> {
             dispatch('s_addAmt',res)
         })
+        .catch((e) => {
+            const regexp =/(.+)\(/g;
+            let match = regexp.exec(e.message)
+            notifications.danger(match[1].toUpperCase(),4000)
+        }) 
     }
 
     export function exchangeBuy(deposit,amt,target) {
@@ -129,6 +143,11 @@
         contract.exchangeBuy(deposit,amt,target).then((res)=> {
             dispatch('s_exchangeBuy',res)
         })
+        .catch((e) => {
+            const regexp =/(.+)\(/g;
+            let match = regexp.exec(e.message)
+            notifications.danger(match[1].toUpperCase(),4000)
+        }) 
     }
     
     export function exchangeSell(deposit,amt,target) {
@@ -136,18 +155,27 @@
         contract.exchangeSell(deposit,amt,target).then((res) => {
             dispatch('s_exchangeSell',res)
         })
+        .catch((e) => {
+            const regexp =/(.+)\(/g;
+            let match = regexp.exec(e.message)
+            notifications.danger(match[1].toUpperCase(),4000)
+        }) 
     }
 
     export function deposit(amt) {
         getSigner()
         let overrides = { value: utils.parseEther(amt.toString()) }
-        try {
+
             contract.deposit(utils.parseEther(amt.toString()), overrides).then((res)=> {
                 dispatch('s_deposit',res)
             })
-        } catch(e) {
-            notifications.danger(e.message,4000)
-        }
+        .catch((e) => {
+            const regexp =/(.+)\(/g;
+            let match = regexp.exec(e.message)
+            notifications.danger(match[1].toUpperCase(),4000)
+        }) 
+            
+        
     }
 
     export const getExchangeBuyGas = async (deposit,amt,target) => {
@@ -155,7 +183,7 @@
         await contract.estimateGas.exchangeBuy(deposit,amt,target).then((res)=>{
             res = gasFee * res;
             dispatch('s_getExchangeBuyGas',res); //return in wei
-        });
+        })
     }
 
     export let swap;
@@ -167,13 +195,15 @@
     export function withdraw(amt) {
         getSigner()
         console.log(utils.parseEther(amt.toString()))
-        try {
-            contract.withdraw(utils.parseEther(amt.toString())).then((res)=> {
-                dispatch('s_withdraw',res)
-            })
-        } catch(e) {
-            notifications.danger(e.message,4000)
-        }
+
+        contract.withdraw(utils.parseEther(amt.toString())).then((res)=> {
+            dispatch('s_withdraw',res)
+        })
+        .catch((e) => {
+            const regexp =/(.+)\(/g;
+            let match = regexp.exec(e.message)
+            notifications.danger(match[1].toUpperCase(),4000)
+        }) 
     }
 
     
