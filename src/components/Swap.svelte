@@ -103,7 +103,7 @@
             inputAmountTok2 = 0;
             inputAmountTok1 = 0;
         }
-        dex.getGasFee(tokenName,inputAmountTok1*Math.pow(10,9),tokenName2);       
+        dex.getExchangeBuyGas(tokenName,inputAmountTok1*Math.pow(10,9),tokenName2);       
     }
 
     function set_token1_amount(){
@@ -123,7 +123,7 @@
     }
 </script>
 
-<DeX bind:this={dex} swap={true} on:s_getAllActivePools={loadActivePools} on:s_getGasFee={getGas} on:s_exchangeBuy={()=>{notifications.success("Transaction Completed!",4000);}}></DeX>
+<DeX bind:this={dex} swap={true} on:s_getAllActivePools={loadActivePools} on:s_getExchangeBuyGas={getGas} on:s_exchangeBuy={()=>{notifications.success("Transaction Completed!",4000);}}></DeX>
 
     <div class = 'swap_container'>
         <div class = 'swap_text'>Swap</div>

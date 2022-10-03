@@ -94,11 +94,27 @@
         })
     }
 
+    export const getAddPoolGas = async (name,val,against) => {
+        const gasFee = await provider.getGasPrice();
+        await contract.estimateGas.addPool(name,val*Math.pow(10,9),against*Math.pow(10,9)).then((res)=>{
+            res = gasFee * res;
+            dispatch('s_getAddPoolGas',res); //return in wei
+        });
+    }
+
     export function addAmt(name,val,against) {
         getSigner()
         contract.addAmt(name,val*Math.pow(10,9),against*Math.pow(10,9)).then((res)=> {
             dispatch('s_addAmt',res)
         })
+    }
+
+    export const getAddAmtGas = async (name,val,against) => {
+        const gasFee = await provider.getGasPrice();
+        await contract.estimateGas.addAmt(name,val*Math.pow(10,9),against*Math.pow(10,9)).then((res)=>{
+            res = gasFee * res;
+            dispatch('s_getAddAmtGas',res); //return in wei
+        });
     }
 
     export function editPoolDetail(name,newname,val,against,status) {
@@ -134,11 +150,11 @@
         }
     }
 
-    export const getGasFee = async (deposit,amt,target) => {
+    export const getExchangeBuyGas = async (deposit,amt,target) => {
         const gasFee = await provider.getGasPrice();
         await contract.estimateGas.exchangeBuy(deposit,amt,target).then((res)=>{
             res = gasFee * res;
-            dispatch('s_getGasFee',res); //return in wei
+            dispatch('s_getExchangeBuyGas',res); //return in wei
         });
     }
 
