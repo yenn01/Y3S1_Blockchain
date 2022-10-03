@@ -15,7 +15,7 @@
             </div>
         </div>
         <div class = 'launch-app'>
-            <button class = 'launch' onclick="location.href='/swap';">Launch App</button>
+            <button class = 'launch' onclick="location.href='/app/dashboard';">Launch App</button>
         </div>
     </div>
     <div class = 'ultimate-dex-container'>
@@ -59,6 +59,9 @@
 </div>
 
 <style>
+    .outest-container {
+        width: 100%;
+    }
 
     .card{
         transition: 0.2s ease-in-out;

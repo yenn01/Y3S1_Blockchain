@@ -124,40 +124,51 @@
 </script>
 
 <DeX bind:this={dex} swap={true} on:s_getAllActivePools={loadActivePools} on:s_getGasFee={getGas} on:s_exchangeBuy={()=>{notifications.success("Transaction Completed!",4000);}}></DeX>
-<div class = 'outmost_container'>
+
     <div class = 'swap_container'>
         <div class = 'swap_text'>Swap</div>
         <div class = 'second_container'>
-            <div class = 'token_container'>
+
+            <!-- <div class = 'token_container'> -->
                 <input id = 'token1' class="token_input" bind:value={inputAmountTok1} on:change={set_token2_amount} oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" type="text" placeholder="0" pattern="^[0-9]*[.,]?[0-9]*$" maxlength=50  inputmode="decimal">      
                 {#if tokenSelected1 === false}      
                     <button type = "button" class="select_token" on:click={toggle}><div class='tok-button-container'>Select Token<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-fill" viewBox="0 0 16 16">
                     <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
                     </svg></div></button> 
                 {:else if tokenSelected1 === true || tokenName != ''}
-                    <button type = "button" class="select_token" on:click={toggle}><div class='tok-button-container'>{tokenName}<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-fill" viewBox="0 0 16 16">
-                    <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
-                    </svg></div></button> 
+                    <button type = "button" class="select_token" on:click={toggle}>
+                        <div class='tok-button-container'>
+                            <div>{tokenName}</div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-fill" viewBox="0 0 16 16">
+                                <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+                            </svg>
+                        </div>
+                    </button> 
                 {/if}
-            </div>
+            <!-- </div> -->
             
         </div>
         <div class = 'pad' on:click={switchToken}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-up" viewBox="0 0 16 16">
             <path fill-rule="evenodd" d="M11.5 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L11 2.707V14.5a.5.5 0 0 0 .5.5zm-7-14a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L4 13.293V1.5a.5.5 0 0 1 .5-.5z"/>
         </svg></div>
         <div class = 'second_container'>
-            <div class = 'token_container'>
+            <!-- <div class = 'token_container'> -->
                 <input id = 'token2' class="token_input" bind:value={inputAmountTok2} on:change={set_token1_amount} oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" type="text" placeholder="0" pattern="^[0-9]*[.,]?[0-9]*$" maxlength=50  inputmode="decimal">            
                 {#if tokenSelected2 === false}      
                     <button type = "button" class="select_token" on:click={toggle2}><div class='tok-button-container'>Select Token<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-fill" viewBox="0 0 16 16">
                     <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
                     </svg></div></button> 
                     {:else if tokenSelected2 === true || tokenName2 != ''}
-                    <button type = "button" class="select_token" on:click={toggle2}><div class='tok-button-container'>{tokenName2}<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-fill" viewBox="0 0 16 16">
-                    <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
-                    </svg></div></button> 
+                    <button type = "button" class="select_token" on:click={toggle2}>
+                        <div class='tok-button-container'>
+                            <div>{tokenName2}</div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-fill" viewBox="0 0 16 16">
+                                <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+                            </svg>
+                        </div>
+                </button> 
                 {/if}
-            </div>
+            <!-- </div> -->
         </div>
         <div class = 'bottom_container'>
             <div class='equivalent_price_container'>
@@ -179,7 +190,7 @@
             <button type = 'button' class = 'swap_button' on:click={swapToken}>Swap</button>
         </div>
     </div>
-</div>
+
 
 <Modal modalClassName= 'first_modal' isOpen = {open} {toggle} {size}>
     <ModalHeader {toggle}>Select a token</ModalHeader>
@@ -262,13 +273,16 @@
 .gas_fee_container{
     display: flex;
     justify-content: flex-end;
-    padding: 1.5%;
+    
+    margin-right:5%;
+    align-self: flex-end;
 }
 
 .tok-button-container{
     display: flex;
     align-items: center;
     justify-content: space-between;
+    font-size: 1.3rem;
 }
 
 .token-name-container{
@@ -280,20 +294,23 @@
     display: flex;
     flex-direction: column;
     border-radius: 15px;
-    width: 35%;
-    height: 63vh;
+    min-width: 500px;
+    min-height:600px;
     background: var(--theme-color-darker-bg);
     text-align: left;
     margin-top: 2%;
     font-weight: 700;   
+    align-items: center;
 }
 
 .swap_text{
-    color:var(--text-color); 
-    margin: 3%;
+    color:var(--theme-color-third); 
+    margin: 5%;
+    align-self: flex-start;
+    font-size: 1.4rem;
 }
 
-.token_container{
+/* .token_container{
     margin-left: 3%;
     width: 65%;
     height: 14vh;
@@ -303,18 +320,21 @@
     flex-direction: column;
     flex-wrap: wrap;
     justify-content: space-around;
-}
+} */
 
 .second_container:hover{
     border: 2px solid var(--text-color);
 }
 
 .second_container{
-    margin-left: 3%;
     background: var(--theme-color-bg);
     border-radius: 10px;
     width: 90%;
     border: 2px solid transparent;
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    padding: 0.2rem 1.5rem;
 }
 
 .pad{
@@ -324,7 +344,7 @@
 
 .select_token{
     width: 45%;
-    height: 40%;
+    height: 80%;
     color: var(--theme-color-darker-bg);
     background: var(--theme-color-second);
     border-radius: 10px;
@@ -340,12 +360,12 @@
 .token_input{
     border-radius: inherit;
     border: none !important;
-    padding-top: 6vh;
+
     width: 100%;
     background: var(--theme-color-bg);
     border-color: var(--theme-color-bg);
     color: var(--text-color);
-    font-size: 4vh;
+    font-size: 3rem;
     font-family: 'Iosevka Web', monospace;
 }
 
@@ -357,8 +377,9 @@
 
 .swap_button{
     border-radius: 10px;
-    width: 50%;
-    height: 100%;
+    min-width: 100px;
+    padding: 0.5rem 1rem;
+    font-size: 1.2rem;
     background: var(--text-color);
     color: var(--theme-color-bg);
 }

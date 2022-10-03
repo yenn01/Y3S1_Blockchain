@@ -29,7 +29,7 @@ contract DeX{
     }
 
     function withdraw(uint256 amount) public {
-        require(amount <= yBalances[msg.sender]);
+        require(amount < yBalances[msg.sender]);
         yBalances[msg.sender] -= amount;
         payable(msg.sender).transfer(address(this).balance); //Change to call
         emit Withdrawn(msg.sender,amount);
@@ -128,7 +128,7 @@ contract DeX{
         if(bytes(cName).length!=0){
             cryptoList[cryptoListNum] = pool(cName, cVal, tVal, true);
             cryptoListNum ++;
-            yBalances[msg.sender] -= tVal;
+            yBalances[msg.sender] -= uint256(tVal * 1000000000);
         }
         emit PoolValue(cName,cVal,tVal);
     }
@@ -165,10 +165,11 @@ contract DeX{
                 }
                 cryptoList[j].cryptoAmt =  uint(tempCVal + cVal);
                 cryptoList[j].tokenAmt = uint(tempTVal + tVal);
+                yBalances[msg.sender] -= uint256(tVal * 1000000000);
                 break;
             }
         }
-        emit PoolValue(cName,uint(cVal),uint(tVal));
+        emit PoolValue(cName,uint(tempCVal + cVal),uint(tempTVal + tVal));
         //Add write success or fail return/emit
     }
 
