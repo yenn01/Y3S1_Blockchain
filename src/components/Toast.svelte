@@ -86,6 +86,10 @@
         z-index: 99;
     }
 
+    .icon {
+        padding-left: 1rem;
+    }
+
     .icon svg {
         z-index: 99;
     }
