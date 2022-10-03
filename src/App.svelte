@@ -5,7 +5,7 @@
 	import Swap from "./components/Swap.svelte";
     import Dashboard from "./components/Dashboard.svelte";
     import About from "./components/About.svelte";
-
+    import Create from "./components/Create.svelte";
 
     let header;
 </script>
@@ -21,19 +21,24 @@
 
 <main>
     <Toast></Toast>
-    <Route path="/">  </Route>
-    <Header></Header>
-    <div class="component-container">
-        <Route path="/dashboard">
-            <Dashboard></Dashboard>
-        </Route>
-        <Route path="/swap">
-			<Swap></Swap>
-        </Route>	
-        <Route path="/about">
-            <About></About>
-        </Route>	
-    </div>
+    <Route path="/">  
+        <About></About>
+    </Route>
+    <Route path="/app/*">
+        <Header></Header>
+        <div class="component-container">
+            <Route path="/dashboard">
+                <Dashboard></Dashboard>
+            </Route>
+            <Route path="/swap">
+                <Swap></Swap>
+            </Route>	
+            	
+            <Route path="/create">
+                <Create></Create>
+            </Route>
+        </div>
+    </Route>
 </main>
 
 <style>
@@ -46,6 +51,11 @@
 		--theme-color-bg: #282c34;
     }
 
+    .component-container {
+        display:flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
 	:global(body){
 		/* background-color:darkseagreen; */
