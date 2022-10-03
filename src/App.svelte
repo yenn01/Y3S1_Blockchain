@@ -5,7 +5,6 @@
 	import Swap from "./components/Swap.svelte";
     import Dashboard from "./components/Dashboard.svelte";
     import About from "./components/About.svelte";
-    import Create from './components/Create.svelte';
 
 
     let header;
@@ -33,9 +32,6 @@
         </Route>	
         <Route path="/about">
             <About></About>
-        </Route>	
-        <Route path="/create">
-            <Create></Create>
         </Route>	
     </div>
 </main>
@@ -82,10 +78,4 @@
 			max-width: none;
 		}
 	}
-
-    .component-container {
-        display:flex;
-        flex-direction: column;
-        align-items: center;
-    }
 </style>

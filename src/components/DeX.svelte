@@ -10,11 +10,10 @@
 
     const dispatch = createEventDispatcher();
 
-    const contractAddr = '0x9f0A7cC1aD913F7354C1309C12FE5fe8EdD3f884'
+    const contractAddr = '0xBD7FcC45acC3efd8Fe78505fD2d99774f9D15ed2'
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     let contract = new ethers.Contract(contractAddr, abi.abi, provider);
-   
 
     let allPools
 
@@ -133,6 +132,14 @@
         } catch(e) {
             notifications.danger(e.message)
         }
+    }
+
+    export const getGasFee = async (deposit,amt,target) => {
+        const gasFee = await provider.getGasPrice();
+        await contract.estimateGas.exchangeBuy(deposit,amt,target).then((res)=>{
+            res = gasFee * res;
+            dispatch('s_getGasFee',res); //return in wei
+        });
     }
 
     export let swap;
