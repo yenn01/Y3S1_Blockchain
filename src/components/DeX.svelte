@@ -10,7 +10,7 @@
 
     const dispatch = createEventDispatcher();
 
-    const contractAddr = '0x017566f4034cD6477a804ff7B08897b1F8deAE68'
+    const contractAddr = '0xAad210565beff0443c826D6c1e892909FCdad5a2'
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     let contract = new ethers.Contract(contractAddr, abi.abi, provider);

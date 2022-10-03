@@ -301,7 +301,7 @@
 
     .dollar-sign {
         font-size: 3rem;
-        color: var(--theme-color-bg)
+        color: var(--text-color)
     }
 
     .bubble {

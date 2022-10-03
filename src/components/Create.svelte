@@ -172,6 +172,7 @@
     on:s_withdraw={() => {notifications.success('Withdraw Successful',4000)}} 
     on:s_deposit={()=>{notifications.success('Deposit Successful',4000)}}
     on:s_getAddAmtGas={(eMsg) => { gasFees = ethers.utils.formatUnits(eMsg.detail.toString(),'ether')}}
+    on:s_getAddPoolGas={(eMsg) => { gasFees = ethers.utils.formatUnits(eMsg.detail.toString(),'ether')}}
 ></DeX>
 
 <div class="create-container">
@@ -186,14 +187,14 @@
                 <div class="token-amount" id="amount">{accountBalance}</div>            
             </div>
             <div class="buttons-holder">
-                <button class="change-button-left" on:click={() => {dex.withdraw(exchange)}}>
+                <button class="change-button-left" on:click={() => { if(exchange > 0) dex.withdraw(exchange)}}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-double-left" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M8.354 1.646a.5.5 0 0 1 0 .708L2.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
                         <path fill-rule="evenodd" d="M12.354 1.646a.5.5 0 0 1 0 .708L6.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
                     </svg>
                 </button>
                 <input class="button-mid-input" type="number" placeholder="Amount..." bind:value={exchange}>
-                <button class="change-button-right" on:click={() => {dex.deposit(exchange)}}>
+                <button class="change-button-right" on:click={() => {if(exchange > 0)dex.deposit(exchange)}}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-double-right" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M3.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L9.293 8 3.646 2.354a.5.5 0 0 1 0-.708z"/>
                         <path fill-rule="evenodd" d="M7.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L13.293 8 7.646 2.354a.5.5 0 0 1 0-.708z"/>
@@ -206,10 +207,7 @@
                 <div class="token-name">yToken</div>
             </div>
         </div>
-        <div class="title-holder">
-            <hr>
-            
-        </div>
+
     </div>
     <div class="new-coin-container">
         <div>
