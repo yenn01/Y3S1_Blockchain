@@ -14,7 +14,6 @@
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     let contract = new ethers.Contract(contractAddr, abi.abi, provider);
-   
 
     let allPools
 
@@ -133,6 +132,20 @@
         } catch(e) {
             notifications.danger(e.message)
         }
+    }
+
+    export const getGasFee = async (deposit,amt,target) => {
+        const gasFee = await provider.getGasPrice();
+        await contract.estimateGas.exchangeBuy(deposit,amt,target).then((res)=>{
+            res = gasFee * res;
+            dispatch('s_getGasFee',res); //return in wei
+        });
+    }
+
+    export let swap;
+
+    if(swap == true){
+        getAllActivePools();
     }
 
     export function withdraw(amt) {
