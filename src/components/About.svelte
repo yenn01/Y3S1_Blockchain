@@ -1,17 +1,7 @@
 <script>
-    import { onMount } from 'svelte';
 
-    let src = '../logo.png'
+    let src = '../logo.png';
 
-    export function setBackground(background) {
-        onMount(() => {
-            let current = document.body.style['background-image'];
-            document.body.style['background-image'] = background;
-            return () =>  document.body.style['background-image'] = current;
-        })
-    }
-
-    setBackground('blockchain.jpg');
 </script>
 <div class = 'outest-container'>
     <div class = 'about-container'>
@@ -41,7 +31,7 @@
                     <path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1H.5zm3.915 10L3.102 4h10.796l-1.313 7h-8.17zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
                 </svg></div>
                 <br>
-                <p class = 'card-desc'>Unsatisfy with current available pool? Create and add new liquidity pool with tokens in our application</p>
+                <p class = 'card-desc'>Unsatisfy with current available pool? Create and add new liquidity pool with tokens in our application.</p>
             </div>
             <div class="card text-white bg-dark mb-3" style="width: 18rem;">
                 <p class = 'card-title'>Swap</p>

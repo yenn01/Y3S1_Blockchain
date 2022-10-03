@@ -22,13 +22,12 @@
 <main>
     <Toast></Toast>
     <Route path="/">  </Route>
+    <Header></Header>
     <div class="component-container">
         <Route path="/dashboard">
-            <Header></Header>
             <Dashboard></Dashboard>
         </Route>
         <Route path="/swap">
-            <Header></Header>
 			<Swap></Swap>
         </Route>	
         <Route path="/about">

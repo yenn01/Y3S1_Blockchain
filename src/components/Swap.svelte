@@ -8,6 +8,7 @@
     let open = false;
     let open2 = false;
     let size = "sm";
+    let res;
     $: inputAmountTok1 = 0;
     $: inputAmountTok2 = 0;
     let account = false;
@@ -24,13 +25,13 @@
     const tokenAmount = [];
 
     const toggle = () => { 
-                size
-                open = !open;
+        size
+        open = !open;
     };
 
     const toggle2 = () => { 
-                size
-                open2 = !open2;
+        size
+        open2 = !open2;
     };
 
     function swapToken(){
@@ -40,7 +41,10 @@
         } else{
             account = true;
             if(tokenName != '' && tokenName2 != '' && token1Amount != 0 && token2Amount !=0){
-
+                console.log(tokenName);
+                console.log(tokenName2);
+                console.log(inputAmountTok1);
+                dex.exchangeBuy(tokenName,inputAmountTok1*Math.pow(10,9),tokenName2);
             }
         }
     }
@@ -108,7 +112,7 @@
     }
 </script>
 
-<DeX bind:this={dex} swap={true} on:s_getAllActivePools={loadActivePools}></DeX>
+<DeX bind:this={dex} swap={true} on:s_getAllActivePools={loadActivePools} on:s_exchangeBuy={()=>{notifications.success("Transaction Completed!",4000);}}></DeX>
 <div class = 'swap_container'>
     <div class = 'swap_text'>Swap</div>
     <div class = 'second_container'>
@@ -168,15 +172,15 @@
     </ModalBody>
 </Modal>
 
-<Modal modalClassName = 'second_modal' isOpen = {open2} {toggle2} {size}>
-    <ModalHeader {toggle2}>Select a token</ModalHeader>
+<Modal modalClassName = 'second_modal' isOpen = {open2} toggle={toggle2} {size}>
+    <ModalHeader toggle={toggle2}>Select a token</ModalHeader>
     <ModalBody>
         {#each tokens as token}
             {#if token_clickable(token) === false}
-            <div class = 'selected-token-container'>{token}</div>
-            {:else}
-                <div class = 'token-name-container' on:click={() => onTokenClick2(token)}>{token}</div>
-        {/if}
+                <div class = 'selected-token-container'>{token}</div>
+                {:else}
+                    <div class = 'token-name-container' on:click={() => onTokenClick2(token)}>{token}</div>
+            {/if}
         {/each}
     </ModalBody>
 </Modal>
