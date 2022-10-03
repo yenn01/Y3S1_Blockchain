@@ -159,7 +159,7 @@
 <DeX bind:this={dex} on:s_getBalanceOf={setToken} create={true} on:s_getAllActivePools={saveCoins} on:s_withdraw={() => {notifications.success('Withdraw Successful',4000)}} on:s_deposit={()=>{notifications.success('Deposit Successful',4000)}}></DeX>
 
 <div class="create-container">
-    <h3>Create New Pool</h3>
+    <h3 in:fly={{y:20}}>{exist > -1? 'Add to Pool' : 'Create & Add to Pool'}</h3>
     
     
     <div class="token-exchange-container">
