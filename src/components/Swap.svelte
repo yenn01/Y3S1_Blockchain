@@ -1,6 +1,6 @@
 <script>
-    import { Contract, ethers } from 'ethers';
-    import { Button, Modal, ModalHeader, ModalBody} from 'sveltestrap';
+    import { ethers } from 'ethers';
+    import { Modal, ModalHeader, ModalBody} from 'sveltestrap';
     import { accountStore } from '../stores/accountStore.js'
     import { notifications } from '../stores/notifications.js'
     import DeX from './DeX.svelte';
@@ -9,7 +9,6 @@
     let open = false;
     let open2 = false;
     let size = "sm";
-    let res;
     $: inputAmountTok1 = 0;
     $: inputAmountTok2 = 0;
     let account = false;
@@ -199,6 +198,11 @@
         <div class = 'swap'>
             <button type = 'button' class = 'swap_button' on:click={swapToken}>Swap</button>
         </div>
+        <div class = 'route_container'>
+            {#if tokenName != '' && tokenName2 != '' && inputAmountTok1 != 0 && inputAmountTok2 != 0}
+                {tokenName} -> yToken -> {tokenName2}
+            {/if}
+        </div>
     </div>
 
 
@@ -233,6 +237,13 @@
 :global(.modal-content){
     color: var(--text-color) !important;
     background-color: var(--theme-color-bg) !important;
+}
+
+.route_container{
+    display: flex;
+    justify-content: center;
+    color: var(--theme-color-second);
+    margin-top: 1rem;
 }
 
 .outmost_container{
