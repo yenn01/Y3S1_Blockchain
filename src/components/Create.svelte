@@ -4,13 +4,51 @@
     import anime from 'animejs/lib/anime.es.js';
     import { ethers } from "ethers";
     import DeX from './DeX.svelte';
+    import { fly, fade } from 'svelte/transition';
+    import { NavItem } from 'sveltestrap';
 
     $: accountBalance = 0;
     $: tokenBalance = 0;
     let dex
     let coinName = ''
     let exchange
+    let coins
+    let coinAmt
+    let tknAmount
+    let exist = -1;
+
+    let initSupply;
+    let kConstant =0;
+    let backSupply;
+    $: difference = 0;
+    $: over = false;
+    $: newPriceRatio = 0
+    $:priceRatio = 0; 
+
+    $: initSupply, calc()
+    $: coinName, calc()
+    $: backSupply, calc()
     $: $accountStore, getBalance($accountStore)
+
+    function calc() {
+        if(exist < 0) {
+            priceRatio = (backSupply === undefined ? 0 : backSupply) / (initSupply === undefined ? 0 : initSupply)
+        } else {
+            priceRatio = tknAmount / coinAmt
+            kConstant = priceRatio
+            let newTkn = (backSupply === undefined ? 0 : backSupply) + tknAmount
+            let newCoin = ((initSupply === undefined ? 0 : initSupply) + coinAmt)
+            newPriceRatio =  newTkn / newCoin
+            difference = (newPriceRatio - priceRatio) / priceRatio
+            if ( Math.abs(difference) > 0.05) {
+                console.log('over')
+                over = true;
+            } else {
+                over = false;
+            }
+        }
+    }
+
     export const getBalance = async (address) => {
         console.log("Inner get")
         const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -25,7 +63,7 @@
         })
         accountBalance = balanceInEth;
         let oldBalance = accountBalance;
-        dex.getBalanceOf('0x487D7189BA3eA329447E2d7665799a6bB4574b23')
+        dex.getBalanceOf(address)
         //when new block is mined
         provider.on('block', async () => {
 
@@ -42,6 +80,8 @@
                 })
                 accountBalance = balanceInEth;
             }
+            dex.getBalanceOf(address)
+            dex.getAllActivePools()
         })
 
     }
@@ -90,11 +130,33 @@
                     duration:3000,            
                 })
     }
+
+    function saveCoins(eventMsg) {
+        coins = eventMsg.detail
+        console.log("coin")
+        console.log(coins)
+        checkExist()
+    }
+
+    function checkExist() {
+        for(let i=0; i< coins.length;i++) {
+            if(coinName === coins[i].name) {
+                exist = i;
+                break;
+            } else {
+                exist = -1;
+            }
+        }
+        coinAmt = coins[exist].coinAmount.toNumber() / Math.pow(10,9)
+        tknAmount = coins[exist].tokenAmount.toNumber()  / Math.pow(10,9)
+        console.log(exist)
+        calc()
+    }
     // console.log($accountStore)
     // getBalance($accountStore)
     // $: $accountStore, getToken()
 </script>
-<DeX bind:this={dex} on:s_getBalanceOf={setToken} create={true}></DeX>
+<DeX bind:this={dex} on:s_getBalanceOf={setToken} create={true} on:s_getAllActivePools={saveCoins} on:s_withdraw={() => {notifications.success('Withdraw Successful',4000)}} on:s_deposit={()=>{notifications.success('Deposit Successful',4000)}}></DeX>
 
 <div class="create-container">
     <h3>Create New Pool</h3>
@@ -135,34 +197,129 @@
     </div>
     <div class="new-coin-container">
         <div>
-            <input class="coin-name" type="text" placeholder="Coin Name Here..." style="transition: 0.3s ;border: 2px solid { coinName.length > 0 ? '#ea86a7': 'transparent'}" bind:value={coinName}/>
+            <input class="coin-name" type="text" placeholder="Coin Name Here..." style="transition: 0.3s ;border: 2px solid { coinName.length > 0 ? '#ea86a7': 'transparent'}" bind:value={coinName} on:focusout={checkExist}/>
         </div>
+        {#if exist > -1 }
+        <div class="pool-amount-inner" transition:fade>
+
+                <div>Current Coins</div>
+                <div class="supply-amount">{coinAmt}</div>
+
+                <div>Current yTokens</div>
+                <div class="supply-amount">{tknAmount}</div>
+        </div>
+        <h3 class="add">Add?</h3>
+        {/if}
         <div class="new-coin-inner">
 
                 <label class="lbl_initSupply" for="initSupply" > {coinName} </label>
-                <input id="initSupply" class="initSupply supply" type="number" placeholder="Initial Supply..."/>
+                <input id="initSupply" class="initSupply supply" type="number" placeholder="Initial Supply..." bind:value={initSupply}/>
 
 
                 <label class="lbl_backSupply" for="backSupply" > yToken </label>
-                <input id="backSupply" class="backSupply supply" type="number" placeholder="Backed Supply..."/>
-
+                <input id="backSupply" style="border:2px solid {backSupply > tokenBalance || backSupply === 0 || over == true ? "#E26D69" : 'transparent'}" class="backSupply supply" type="number" placeholder="Backed Supply..." bind:value={backSupply}/>
+                {#if backSupply > tokenBalance || backSupply === 0 || over == true}
+                <p class="warning-message" transition:fade>{backSupply > tokenBalance ? "Not enough yTokens." : backSupply === 0 ?'yTokens cannot be zero.' : over == true ? 'Ratio difference  >5%':''}</p>
+                {/if}
         </div>
-        <div>
-            <h4>2367</h4>
-            <small>Price ratio</small>
+        <div class="coin-ratio-container">
+            <div class="">
+                {#if exist > -1}
+                    <small transition:fade class="timelabel">OLD</small><br>
+                {/if}
+                    <small>1 {coinName} = </small>
+                {#key priceRatio}
+                    <h2 in:fly={{ y: -10 }}>{priceRatio.toFixed(5)}</h2>
+                {/key}
+                <small>yToken</small>
+            </div>
+            {#if exist > -1}
+            <div class="difference" style="color: { difference * 100 > 0 ? '#81e292' : difference == 0 ? '#bfc2c7' : '#E26D69'}">{(difference*100).toFixed(2)}%</div>
+            <div class="" transition:fade>
+                <small class="timelabel">NEW</small><br>
+                <small>1 {coinName} = </small>
+                {#key newPriceRatio}
+                    <h2 in:fly={{ y: -10 }} style="color: {over == true ? '#E26D69' : '#81e292'}">{newPriceRatio.toFixed(5)}</h2>
+                {/key}
+                <small>yToken</small>
+            </div>
+            {/if}
         </div>
-    </div>
-    <div class="button">
         
+      
+        
+      
     </div>
+    {#if coinName.length > 0 && initSupply > 0 && backSupply > 0 && backSupply <= tokenBalance && exist === -1}
+            <div class="button-container" in:fly={{y:20}} out:fly={{y:10}}>
+                <button on:click={() => dex.addPool(coinName,initSupply,backSupply)}>Create Pool</button>
+            </div>
+    {:else if coinName.length > 0 && initSupply > 0 && backSupply > 0 && backSupply <= tokenBalance && exist > -1 && over == false}
+        <div class="button-container" in:fly={{y:20}} out:fly={{y:10}}>
+            <button on:click={() => dex.addAmt(coinName,initSupply,backSupply)}>Add to pool</button>
+        </div>
+    
+    {/if}
+    
 </div>
 
 <style>
+    .timelabel{
+        color:var(--theme-color-second)
+    }
+
+
+    .supply-amount {
+        color:var(--theme-color-second)
+    }
+
+
+    .pool-amount-inner {
+        display:grid;
+        grid-template-columns: 1fr 1fr; 
+        grid-template-rows: 1fr 1fr ; 
+        grid-gap: 1rem;
+        margin: 1rem 0;
+        justify-items: center;
+        align-items: center;
+        font-size: 1.2rem;
+    }
+
+    .pool-amount-inner > div {
+        width:100%;
+    }
+
+
+    .button-container {
+
+        min-width: 500px;
+    }
+
+    .button-container button {
+        background-color: var(--theme-color-main);
+        width:100%;
+        color:black;
+        border-radius: 10px;
+    }
+
+    .warning-message {
+        grid-column: 1/3;
+        color:#E26D69;
+    }
+
+    .coin-ratio-container {
+        font-family: 'Iosevka Web', monospace;
+        display:flex;
+        justify-content: space-evenly;
+        align-items: center;
+    }
+
+
     .new-coin-inner {
         display:grid;
         margin:auto;
         grid-template-columns: 1fr 1fr; 
-        grid-template-rows: 1fr 1fr; 
+        grid-template-rows: 1fr 1fr 1fr; 
         grid-gap: 1rem;
         justify-items: center;
         align-items: center;
@@ -179,10 +336,11 @@
         transition: 0.3s;
         text-align: center;
         justify-self: flex-start;
+        max-width: 500px;
     }
 
     .coin-name:focus {
-        border-bottom: 3px solid var(--theme-color-main);
+        border-bottom: 3px solid var(--theme-color-main) !important;
         transition: 0.3s;
     }
 
@@ -195,7 +353,7 @@
 
     .supply:focus {
         border-radius: 20px;
-        border: 1px solid var(--theme-color-second);
+        border: 1px solid var(--theme-color-second) !important;
         transition:0.3s;
 
     }
@@ -219,6 +377,7 @@
         flex-direction: column;
         padding:1rem;
         min-height:500px;
+        max-width: 500px;
     }
 
     .create-container {
@@ -226,6 +385,7 @@
         flex-direction: column;
         margin: 1rem;
         width:90%;
+        align-items: center;
     }
 
     .token-name {
@@ -320,6 +480,16 @@
     /* Firefox */
     input[type=number] {
         -moz-appearance: textfield;
+    }
+
+    h2 {
+        color:var(--theme-color-third);
+      
+        margin:0;
+    }
+    
+    small {
+        font-weight: 600;
     }
 
 </style>

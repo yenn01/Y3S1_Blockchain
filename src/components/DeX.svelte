@@ -10,7 +10,7 @@
 
     const dispatch = createEventDispatcher();
 
-    const contractAddr = '0x64F88cb2e7a490ef3b8f6009eeB581B9bC6dB67A'
+    const contractAddr = '0xFacBB8e103a2BBcb5C1A76B75e1Ba6c0F80561ED'
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     let contract = new ethers.Contract(contractAddr, abi.abi, provider);
@@ -90,14 +90,14 @@
     //Write Functions
     export function addPool(name,val,against) {
         getSigner()
-        contract.addPool(name,val,against).then((res)=> {
+        contract.addPool(name,val*Math.pow(10,9),against*Math.pow(10,9)).then((res)=> {
             dispatch('s_addPool',res)
         })
     }
 
     export function addAmt(name,val,against) {
         getSigner()
-        contract.addAmt(name,val,against).then((res)=> {
+        contract.addAmt(name,val*Math.pow(10,9),against*Math.pow(10,9)).then((res)=> {
             dispatch('s_addAmt',res)
         })
     }
@@ -137,6 +137,7 @@
 
     export function withdraw(amt) {
         getSigner()
+        console.log(utils.parseEther(amt.toString()))
         try {
             contract.withdraw(utils.parseEther(amt.toString())).then((res)=> {
                 dispatch('s_withdraw',res)
@@ -182,6 +183,7 @@
 
 
     if(create == true) {
+        getAllActivePools()
         getBalanceOf($accountStore)
     }
 
