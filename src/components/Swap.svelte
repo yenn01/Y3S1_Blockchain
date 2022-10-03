@@ -104,7 +104,7 @@
             inputAmountTok2 = 0;
             inputAmountTok1 = 0;
         }
-        dex.getGasFee(tokenName,inputAmountTok1*Math.pow(10,9),tokenName2);       
+        dex.getExchangeBuyGas(tokenName,inputAmountTok1*Math.pow(10,9),tokenName2);       
     }
 
     function set_token1_amount(){
@@ -130,7 +130,7 @@
     }
 </script>
 
-<DeX bind:this={dex} swap={true} on:s_getAllActivePools={loadActivePools} on:s_getGasFee={getGas} on:s_exchangeBuy={()=>{notifications.success("Transaction Completed!",4000);}}></DeX>
+<DeX bind:this={dex} swap={true} on:s_getAllActivePools={loadActivePools} on:s_getExchangeBuyGas={getGas} on:s_exchangeBuy={()=>{notifications.success("Transaction Completed!",4000);}}></DeX>
 
     <div class = 'swap_container'>
         <div class = 'swap_text'>Swap</div>
@@ -178,7 +178,7 @@
             <!-- </div> -->
         </div>
         <div class = 'bottom_container'>
-            <div class='equivalent_price_container'>
+            <div class='equivalent_price_container' transition:fade>
                 {#if tokenName != '' && tokenName2 != ''}
                     1 {tokenName2} = {(token1Amount/token2Amount).toFixed(4)} {tokenName}
                     <!-- {#if document.} -->
@@ -187,7 +187,10 @@
         </div>
         {#if tokenName != '' && tokenName2 != '' && inputAmountTok1 != 0 && inputAmountTok2 != 0}
             <div class = 'gas_fee_container' transition:fade>
-                <div class = 'gas_text'><span class = 'tooltiptext' transition:fade>Estimated Gas Fee </span><div class = 'gas'><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-fuel-pump" viewBox="0 0 16 16">
+                <div class = 'gas_text'>
+                    <span class = 'tooltiptext' transition:fade>Estimated Gas Fees </span>
+                    <div class = 'gas'>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-fuel-pump" viewBox="0 0 16 16">
                     <path d="M3 2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-5Z"/>
                     <path d="M1 2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v8a2 2 0 0 1 2 2v.5a.5.5 0 0 0 1 0V8h-.5a.5.5 0 0 1-.5-.5V4.375a.5.5 0 0 1 .5-.5h1.495c-.011-.476-.053-.894-.201-1.222a.97.97 0 0 0-.394-.458c-.184-.11-.464-.195-.9-.195a.5.5 0 0 1 0-1c.564 0 1.034.11 1.412.336.383.228.634.551.794.907.295.655.294 1.465.294 2.081v3.175a.5.5 0 0 1-.5.501H15v4.5a1.5 1.5 0 0 1-3 0V12a1 1 0 0 0-1-1v4h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1V2Zm9 0a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v13h8V2Z"/>
                 </svg> : {gasPrice} ETH </div></div>
@@ -350,7 +353,7 @@
 }
 
 .select_token{
-    width: 45%;
+    width: 200px;
     height: 80%;
     color: var(--theme-color-darker-bg);
     background: var(--theme-color-second);

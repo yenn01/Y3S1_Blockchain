@@ -2,10 +2,12 @@
     import { accountStore } from '../stores/accountStore.js'
     import { notifications } from '../stores/notifications.js'
     import anime from 'animejs/lib/anime.es.js';
-    import { ethers } from "ethers";
+    import { ethers, utils } from "ethers";
     import DeX from './DeX.svelte';
     import { fly, fade } from 'svelte/transition';
     import { NavItem } from 'sveltestrap';
+    import { empty } from 'svelte/internal';
+    import { parseEther } from 'ethers/lib/utils.js';
 
     $: accountBalance = 0;
     $: tokenBalance = 0;
@@ -16,7 +18,7 @@
     let coinAmt
     let tknAmount
     let exist = -1;
-
+    $: gasFees=0;
     let initSupply;
     let kConstant =0;
     let backSupply;
@@ -33,6 +35,9 @@
     function calc() {
         if(exist < 0) {
             priceRatio = (backSupply === undefined ? 0 : backSupply) / (initSupply === undefined ? 0 : initSupply)
+            if(dex !== undefined) {
+                dex.getAddPoolGas(coinName,initSupply,backSupply)
+            }
         } else {
             priceRatio = tknAmount / coinAmt
             kConstant = priceRatio
@@ -46,7 +51,12 @@
             } else {
                 over = false;
             }
+            if(dex !== undefined) {
+                dex.getAddAmtGas(coinName,initSupply,backSupply)
+            }
+            
         }
+        
     }
 
     export const getBalance = async (address) => {
@@ -156,10 +166,16 @@
     // getBalance($accountStore)
     // $: $accountStore, getToken()
 </script>
-<DeX bind:this={dex} on:s_getBalanceOf={setToken} create={true} on:s_getAllActivePools={saveCoins} on:s_withdraw={() => {notifications.success('Withdraw Successful',4000)}} on:s_deposit={()=>{notifications.success('Deposit Successful',4000)}}></DeX>
+<DeX bind:this={dex} create={true} 
+    on:s_getBalanceOf={setToken} 
+    on:s_getAllActivePools={saveCoins} 
+    on:s_withdraw={() => {notifications.success('Withdraw Successful',4000)}} 
+    on:s_deposit={()=>{notifications.success('Deposit Successful',4000)}}
+    on:s_getAddAmtGas={(eMsg) => { gasFees = ethers.utils.formatUnits(eMsg.detail.toString(),'ether')}}
+></DeX>
 
 <div class="create-container">
-    <h3>Create New Pool</h3>
+    <h3 in:fly={{y:20}}>{exist > -1? 'Add to Pool' : 'Create & Add to Pool'}</h3>
     
     
     <div class="token-exchange-container">
@@ -254,9 +270,29 @@
             <div class="button-container" in:fly={{y:20}} out:fly={{y:10}}>
                 <button on:click={() => dex.addPool(coinName,initSupply,backSupply)}>Create Pool</button>
             </div>
+            <div class='gas-fees'>
+                <small class="inner-gas-fees">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-fuel-pump-fill" viewBox="0 0 16 16">
+                        <path d="M1 2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v8a2 2 0 0 1 2 2v.5a.5.5 0 0 0 1 0V8h-.5a.5.5 0 0 1-.5-.5V4.375a.5.5 0 0 1 .5-.5h1.495c-.011-.476-.053-.894-.201-1.222a.97.97 0 0 0-.394-.458c-.184-.11-.464-.195-.9-.195a.5.5 0 0 1 0-1c.564 0 1.034.11 1.412.336.383.228.634.551.794.907.295.655.294 1.465.294 2.081V7.5a.5.5 0 0 1-.5.5H15v4.5a1.5 1.5 0 0 1-3 0V12a1 1 0 0 0-1-1v4h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1V2Zm2.5 0a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-5a.5.5 0 0 0-.5-.5h-5Z"/>
+                      </svg>
+                     {gasFees}
+                    
+                
+                </small>
+            </div>
     {:else if coinName.length > 0 && initSupply > 0 && backSupply > 0 && backSupply <= tokenBalance && exist > -1 && over == false}
         <div class="button-container" in:fly={{y:20}} out:fly={{y:10}}>
             <button on:click={() => dex.addAmt(coinName,initSupply,backSupply)}>Add to pool</button>
+        </div>
+        <div class='gas-fees'>
+            <small class="inner-gas-fees">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-fuel-pump-fill" viewBox="0 0 16 16">
+                    <path d="M1 2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v8a2 2 0 0 1 2 2v.5a.5.5 0 0 0 1 0V8h-.5a.5.5 0 0 1-.5-.5V4.375a.5.5 0 0 1 .5-.5h1.495c-.011-.476-.053-.894-.201-1.222a.97.97 0 0 0-.394-.458c-.184-.11-.464-.195-.9-.195a.5.5 0 0 1 0-1c.564 0 1.034.11 1.412.336.383.228.634.551.794.907.295.655.294 1.465.294 2.081V7.5a.5.5 0 0 1-.5.5H15v4.5a1.5 1.5 0 0 1-3 0V12a1 1 0 0 0-1-1v4h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1V2Zm2.5 0a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-5a.5.5 0 0 0-.5-.5h-5Z"/>
+                  </svg>
+                 {gasFees}
+               
+            
+            </small>
         </div>
     
     {/if}
@@ -264,6 +300,20 @@
 </div>
 
 <style>
+    .gas-fees {
+        padding-top: 0.5rem;
+    }
+
+    .inner-gas-fees {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .inner-gas-fees > svg {
+        padding-right: 0.25rem;
+    }
+
     .timelabel{
         color:var(--theme-color-second)
     }

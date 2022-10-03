@@ -11,6 +11,8 @@
 </script>
 
 <svelte:head>
+    <title>/swap</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
  	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
@@ -40,8 +42,12 @@
         </div>
     </Route>
 </main>
+<footer>
+	<small>All Rights Reserved | &copy; 2022 y/swap</small>
+</footer>
 
 <style>
+    
     :root {
         --text-color: #bfc2c7;
         --theme-color-main: #ea86a7;
@@ -76,12 +82,11 @@
         min-width:500px;
 	}
 
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
-	}
+	footer {
+        color:var(--text-color);
+        text-align: center;
+    }
+
 
 	@media (min-width: 500px) {
 		main {
