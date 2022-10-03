@@ -120,7 +120,7 @@
             eventMsg.detail.forEach((item,index)=> {
                     totalSupply += item.tokenAmount / Math.pow(10,9);
                     
-                    coins.push({id:counter,name:item.name+" / yToken"})
+                    coins.push({id:counter,name:item.name+" / yToken",cVal:item.coinAmount.toNumber()/Math.pow(10,9),tVal:item.tokenAmount.toNumber()/Math.pow(10,9)})
             })
             activePoolNum = eventMsg.detail.length;
             anime({
@@ -140,7 +140,7 @@
     //     // let parsed = JSON.parse(JSON.stringify())
     //     // console.log(parsed)
     //     // 4-7
-    //     show = true;
+         show = true;
     }
 
     const getBlock = async () => {
@@ -256,19 +256,49 @@
             {/if}
         </div>
     </div>
+    {#if show === true}
     <div class="bottom-container">
-        <div>some text</div>
+        <div class="row-pool row-title">
+            <div class="">Pair</div>
+            <div class="">Number of Coins</div>
+            <div class="">Number of Tokens</div>
+        </div>
+        <hr>
+        {#each coins as coin (coin.name)}
+
+        <div class="row-pool">
+            <div class="">{coin.name}</div>
+            <div class="">{coin.cVal.toFixed(5)}</div>
+            <div class="">{coin.tVal.toFixed(5)}</div>
+        </div>
+        {/each}
     </div>
+    {/if}
 </div>
-<button on:click={() => {dex.getValChanges()}}>Get Filters</button>
+
+
+<!-- <button on:click={() => {dex.getValChanges()}}>Get Filters</button>
 <button on:click={() => {dex.exchangeBuy('wBitcoin',20,'BNB')}}>Exchange</button>
-<button on:click={() => {dex.deposit(5)}}>Deposit</button>
+<button on:click={() => {dex.deposit(5)}}>Deposit</button> -->
 
 
 
 
 
 <style>
+
+    .row-pool {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: 1fr;
+        font-family: 'Iosevka Web', monospace;
+    }
+
+    .row-title {
+        font-weight: 500;
+        font-size: 1.3rem;
+    }
+
     .dollar-sign {
         font-size: 3rem;
         color: var(--theme-color-bg)
@@ -282,6 +312,11 @@
         display:flex;
         justify-content: space-between;
         margin-bottom: 1rem;
+    }
+
+    .bottom-container {
+        background-color: var(--theme-color-darker-bg);
+        padding: 1rem;
     }
 
 

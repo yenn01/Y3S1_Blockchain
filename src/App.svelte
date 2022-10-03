@@ -40,8 +40,12 @@
         </div>
     </Route>
 </main>
+<footer>
+	<small>All Rights Reserved | &copy; 2022 y/swap</small>
+</footer>
 
 <style>
+    
     :root {
         --text-color: #bfc2c7;
         --theme-color-main: #ea86a7;
@@ -76,12 +80,11 @@
         min-width:500px;
 	}
 
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
-	}
+	footer {
+        color:var(--text-color);
+        text-align: center;
+    }
+
 
 	@media (min-width: 500px) {
 		main {

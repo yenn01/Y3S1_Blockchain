@@ -130,7 +130,7 @@
                 dispatch('s_deposit',res)
             })
         } catch(e) {
-            notifications.danger(e.message)
+            notifications.danger(e.message,4000)
         }
     }
 
@@ -156,7 +156,7 @@
                 dispatch('s_withdraw',res)
             })
         } catch(e) {
-            notifications.danger(e.message)
+            notifications.danger(e.message,4000)
         }
     }
 
