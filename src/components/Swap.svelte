@@ -57,6 +57,7 @@
             tokens.push(element.name);
             tokenAmount.push(element.coinAmount);
         });
+        console.log(tokenAmount[1].toNumber());
     }
 
     function onTokenClick(token){
@@ -98,7 +99,7 @@
                 inputAmountTok2 = (inputAmountTok1 * (token2Amount/token1Amount)).toFixed(4);
             }
         }
-        if(inputAmountTok2 > tokenAmount[tokens.indexOf(tokenName2)]){
+        if(inputAmountTok2*Math.pow(10,9) > tokenAmount[tokens.indexOf(tokenName2)]){
             notifications.danger("Amount of " + tokenName2 + " in the pool is not sufficient.",4000);
             inputAmountTok2 = 0;
             inputAmountTok1 = 0;
@@ -109,6 +110,12 @@
     function set_token1_amount(){
         if(tokenName != '' && tokenName2 != ''){
             inputAmountTok1 = (inputAmountTok2 * (token1Amount/token2Amount)).toFixed(2);
+        }
+        if(inputAmountTok2*Math.pow(10,9) > tokenAmount[tokens.indexOf(tokenName2)]){
+            console.log('hi');
+            notifications.danger("Amount of " + tokenName2 + " in the pool is not sufficient.",4000);
+            inputAmountTok2 = 0;
+            inputAmountTok1 = 0;
         }       
     }
 
