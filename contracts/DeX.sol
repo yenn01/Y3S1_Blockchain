@@ -39,8 +39,8 @@ contract DeX{
         return address(this).balance;
     }
 
-    function balanceOf() public view returns(uint256) {
-        return yBalances[msg.sender];
+    function balanceOf(address addr) public view returns(uint256) {
+        return yBalances[addr];
     }
 
     

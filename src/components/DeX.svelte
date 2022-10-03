@@ -5,7 +5,8 @@
     //Used to create dispatch events catched by parent components
     import { createEventDispatcher } from 'svelte';
     import {defaultRecent} from '../stores/defaultRecent'
-    import { merge_ssr_styles } from "svelte/internal";
+    import { accountStore } from '../stores/accountStore.js'
+    import { notifications } from "../stores/notifications";
 
     const dispatch = createEventDispatcher();
 
@@ -34,10 +35,10 @@
         })
     }
 
-    export function getBalanceOf() {
-        contract.balanceOf().then((res)=> {
-            console.log(res)
-            dispatch('s_getEther',res)
+    export function getBalanceOf(address) {
+        contract.balanceOf(address).then((res)=> {
+            //console.log(res)
+            dispatch('s_getBalanceOf',res)
         })
     }
 
@@ -125,9 +126,13 @@
     export function deposit(amt) {
         getSigner()
         let overrides = { value: utils.parseEther(amt.toString()) }
-        contract.deposit(utils.parseEther(amt.toString()), overrides).then((res)=> {
-            dispatch('s_deposit',res)
-        })
+        try {
+            contract.deposit(utils.parseEther(amt.toString()), overrides).then((res)=> {
+                dispatch('s_deposit',res)
+            })
+        } catch(e) {
+            notifications.danger(e.message)
+        }
     }
 
     export let swap;
@@ -138,9 +143,13 @@
 
     export function withdraw(amt) {
         getSigner()
-        contract.withdraw(amt).then((res)=> {
-            dispatch('s_withdraw',res)
-        })
+        try {
+            contract.withdraw(utils.parseEther(amt.toString())).then((res)=> {
+                dispatch('s_withdraw',res)
+            })
+        } catch(e) {
+            notifications.danger(e.message)
+        }
     }
 
     
@@ -171,9 +180,15 @@
 
     export let dashboard;
     export let defaultToken = 'Bitcoin';
+    export let create;
     if( dashboard == true) {
         getAllActivePools()
         getLast10ValChanges($defaultRecent)
+    }
+
+
+    if(create == true) {
+        getBalanceOf($accountStore)
     }
 
 
